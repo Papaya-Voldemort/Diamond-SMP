@@ -1,0 +1,45 @@
+title: "&6Diamond SMP Rules"
+sections:
+  conduct:
+    title: "&cCore Rules"
+    icon: "&c!"
+    lines:
+      - "&fNo griefing player bases."
+      - "&fDo not blow up spawn."
+      - "&fDo not build outside the world border."
+      - "&fDo not kill naked players."
+  cheating:
+    title: "&4No Cheating"
+    icon: "&4X"
+    lines:
+      - "&fNo hacking or client cheats."
+      - "&fNo x-ray, fly, reach, or combat assist."
+      - "&fAsk admins before using unusual mechanics."
+  progression:
+    title: "&6Progression"
+    icon: "&6*"
+    lines:
+      - "&fNetherite is removed from normal progression."
+      - "&fGod gear only comes from event villagers."
+      - "&fProtection IV and Sharpness V are event-exclusive."
+  events:
+    title: "&aEvents"
+    icon: "&a#"
+    lines:
+      - "&fWinning server events unlocks villager rewards."
+      - "&fEvent villagers despawn after 30 minutes."
+      - "&fPurchased god items retire globally until reset."
+  economy:
+    title: "&eUtility"
+    icon: "&e$"
+    lines:
+      - "&f/string fills empty slots but has a cooldown."
+      - "&fGolden apple recipe yields 8 apples."
+      - "&f5 string crafts into 5 cobwebs."
+  combat:
+    title: "&dGod Gear Notes"
+    icon: "&d+"
+    lines:
+      - "&fGod sword grants Strength II while held."
+      - "&fGod bow uses left click for short-bow fire and right click for a buffed bow shot."
+      - "&fInfinite Totem has a server cooldown."

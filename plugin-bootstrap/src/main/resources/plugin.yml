@@ -1,0 +1,112 @@
+name: DiamondSMP
+version: ${version}
+main: io.github.diamondsmp.bootstrap.DiamondSmpPlugin
+api-version: "1.21.11"
+description: Event-driven PvP progression plugin for Diamond SMP
+authors:
+  - Diamond SMP
+load: POSTWORLD
+softdepend:
+  - PlaceholderAPI
+commands:
+  string:
+    description: Fill empty inventory slots with string.
+    usage: /string
+    permission: diamondsmp.command.string
+  tpa:
+    description: Request teleport to another player.
+    usage: /tpa <player>
+    permission: diamondsmp.command.tpa
+  tpaccept:
+    description: Accept a teleport request.
+    usage: /tpaccept
+    permission: diamondsmp.command.tpa
+  tpdeny:
+    description: Deny a teleport request.
+    usage: /tpdeny
+    permission: diamondsmp.command.tpa
+  kit:
+    description: Claim a configured kit.
+    usage: /kit <name>
+    permission: diamondsmp.command.kit
+  trust:
+    description: Send or accept a trust request.
+    usage: /trust <player>
+    permission: diamondsmp.command.trust
+  untrust:
+    description: Remove trust with a player.
+    usage: /untrust <player>
+    permission: diamondsmp.command.trust
+  spawn:
+    description: Teleport to world spawn.
+    usage: /spawn
+    permission: diamondsmp.command.spawn
+  rules:
+    description: Open the server rules GUI.
+    usage: /rules
+    permission: diamondsmp.command.rules
+  event:
+    description: Show the active server event.
+    usage: /event
+    permission: diamondsmp.command.event
+  p:
+    description: Manage a PvP party.
+    usage: /p <player|accept|leave|list|kick|disband>
+    permission: diamondsmp.command.party
+  pvp:
+    description: Launch beta PvP matches and minigames.
+    usage: /pvp [menu|status|modes|kits|leave|rematch|start <mode> <kit>|test ...]
+    permission: diamondsmp.command.pvp
+  godvillager:
+    description: Manage god reward villagers.
+    usage: /godvillager spawn <type> <event>
+    permission: diamondsmp.admin.godvillager
+  serverevent:
+    description: Start or stop plugin events.
+    usage: /serverevent <status|stop|start <event> <villagerType>>
+    permission: diamondsmp.admin.events
+  dsborder:
+    description: Control the world border.
+    usage: /dsborder <size|center|warning|reset>
+    permission: diamondsmp.admin.border
+  godtest:
+    description: Receive a testing kit with all custom items.
+    usage: /godtest
+    permission: diamondsmp.admin.godtest
+  end:
+    description: Open or close access to the End.
+    usage: /end <open|close|status>
+    permission: diamondsmp.admin.end
+permissions:
+  diamondsmp.command.string:
+    default: true
+  diamondsmp.command.tpa:
+    default: true
+  diamondsmp.command.kit:
+    default: true
+  diamondsmp.command.trust:
+    default: true
+  diamondsmp.command.spawn:
+    default: true
+  diamondsmp.command.rules:
+    default: true
+  diamondsmp.command.event:
+    default: true
+  diamondsmp.command.party:
+    default: true
+  diamondsmp.command.pvp:
+    default: true
+  diamondsmp.admin.godvillager:
+    default: op
+  diamondsmp.admin.events:
+    default: op
+  diamondsmp.admin.border:
+    default: op
+  diamondsmp.admin.kit:
+    default: op
+  diamondsmp.admin.godtest:
+    default: op
+  diamondsmp.admin.end:
+    default: op
+  diamondsmp.admin.pvp-test:
+    default: op

@@ -1,0 +1,122 @@
+debug: false
+
+cooldowns:
+  infinite-totem-seconds: 180
+  string-command-seconds: 300
+  tpa-seconds: 60
+
+combat:
+  god-bow-base-damage: 4.0
+  god-bow-headshot-bonus: 2.0
+  god-bow-velocity: 3.2
+  god-bow-range: 48.0
+  axe-armor-durability-multiplier: 3.0
+  bedrock-break-seconds: 30
+  tag-seconds: 15
+
+world:
+  diamond-drop-multiplier: 3.0
+  exposed-diamond-multiplier: 5.0
+  diamond-vein-size-multiplier: 2.0
+  remove-ancient-debris-from-new-chunks: true
+  disable-netherite-progression: true
+  disable-restricted-enchants: true
+  disable-strength-ii: true
+
+villagers:
+  despawn-minutes: 30
+  costs:
+    helmet: 64
+    chestplate: 64
+    leggings: 64
+    boots: 64
+    sword: 64
+    axe: 64
+    pickaxe: 64
+    bow: 64
+    infinite_totem: 64
+    enchanted_gapple: 64
+
+kits:
+  allow-regular-users: true
+
+world-border:
+  default-size: 4000.0
+  default-center:
+    x: 0.0
+    z: 0.0
+  warning-distance: 64
+  warning-time: 15
+
+systems:
+  god-items: true
+  teleport: true
+  events: true
+  rules-gui: true
+  border-tools: true
+
+pvp:
+  enabled: true
+  beta: true
+  world-name: diamond_pvp_beta
+  party-invite-timeout-seconds: 60
+  arena-count: 4
+  arena:
+    y-level: 90
+    half-size: 18
+    height: 8
+    spacing: 96
+    spawn-spread: 4
+    floor-material: SMOOTH_STONE
+    wall-material: BARRIER
+  kits:
+    - starter
+    - archer
+    - tank
+  gui:
+    hub-title: "&4PvP Hub"
+    setup-title: "&4PvP Setup"
+    result-title: "&3Match Complete"
+    hub-size: 54
+    setup-size: 54
+    result-size: 27
+    hub-filler: GRAY_STAINED_GLASS_PANE
+    setup-filler: BLACK_STAINED_GLASS_PANE
+    result-filler: LIGHT_BLUE_STAINED_GLASS_PANE
+    party-icon: PLAYER_HEAD
+    help-icon: BOOK
+    available-arenas-icon: COMPASS
+    return-icon: OAK_DOOR
+    random-mode-icon: LIGHTNING_ROD
+    no-compatible-mode-icon: BARRIER
+    rematch-icon: NETHERITE_SWORD
+    locked-rematch-icon: CLOCK
+    roster-icon: PLAYER_HEAD
+    rules-icon: MAP
+    checks-icon: IRON_BARS
+    selected-kit-icon: IRON_SWORD
+    previous-kit-icon: ARROW
+    random-kit-icon: CHEST
+    next-kit-icon: SPECTRAL_ARROW
+    start-icon: EMERALD
+    back-icon: BARRIER
+    result-return-icon: GRASS_BLOCK
+    result-rematch-icon: NETHERITE_SWORD
+    result-new-match-icon: COMPASS
+  modes:
+    1v1:
+      display-name: "&c1v1 Duel"
+      team-sizes: [1, 1]
+      icon: IRON_SWORD
+    2v2:
+      display-name: "&62v2 Clash"
+      team-sizes: [2, 2]
+      icon: DIAMOND_SWORD
+    3v3:
+      display-name: "&53v3 Skirmish"
+      team-sizes: [3, 3]
+      icon: NETHERITE_SWORD
+    1v2:
+      display-name: "&e1v2 Trial"
+      team-sizes: [1, 2]
+      icon: SHIELD

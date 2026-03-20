@@ -1,0 +1,163 @@
+prefix: "&7[&6DiamondSMP&7] &r"
+
+string:
+  success: "&aFilled every empty slot with string."
+  cooldown: "&c/string is on cooldown for &e{time}s&c."
+
+teleport:
+  usage: "&cUsage: /tpa <player>"
+  invalid-target: "&cThat player is not available."
+  sent: "&aSent a teleport request to &e{player}&a."
+  received: "&e{player} wants to teleport to you."
+  accepted: "&a{player} accepted your teleport request."
+  denied: "&c{player} denied your teleport request."
+  timeout: "&cTeleport request to &e{player}&c timed out."
+  timeout-target: "&cTeleport request from &e{player}&c timed out."
+  accept: "&aTeleport request accepted."
+  deny: "&cTeleport request denied."
+  none: "&cYou do not have a pending teleport request."
+  missing: "&cThe requesting player is no longer online."
+  disabled: "&cTeleport requests are disabled right now."
+  combat: "&cYou cannot use teleport requests during combat."
+  pvp: "&cYou cannot use teleport requests while inside PvP."
+  target-combat: "&c{player} is in combat and cannot accept teleports."
+  target-pvp: "&c{player} is in PvP and cannot accept teleports."
+  requester-combat: "&c{player} is in combat and cannot teleport right now."
+  requester-pvp: "&c{player} is in PvP and cannot teleport right now."
+
+spawn:
+  teleport: "&aTeleported to spawn."
+
+totem:
+  cooldown: "&cInfinite Totem cooldown: &e{time}s&c remaining."
+
+combat:
+  tagged: "&cCombat tagged for &e{time}s&c."
+  logout-kill: "&cYou logged out during combat and died."
+
+trust:
+  usage: "&cUsage: /trust <player>"
+  untrust-usage: "&cUsage: /untrust <player>"
+  invalid-target: "&cThat player is not available."
+  sent: "&aSent a trust request to &e{player}&a."
+  received: "&e{player} wants to trust-hit with you."
+  accepted: "&aYou are now trusted with &e{player}&a."
+  accepted-other: "&a{player} accepted your trust request."
+  already: "&eYou already trust-hit with &6{player}&e."
+  pending: "&eA trust request is already pending with &6{player}&e."
+  none: "&cNo trust or request existed with &e{player}&c."
+  removed: "&cTrust removed with &e{player}&c."
+  removed-other: "&c{player} removed trust with you."
+
+kit:
+  usage: "&cUsage: /kit <name>"
+  received: "&aReceived kit &e{name}&a."
+  not-found: "&cThat kit does not exist."
+  no-permission: "&cYou do not have permission to use that kit."
+  disabled: "&cOnly admins can use kits right now."
+
+end:
+  opened: "&aThe End is now open."
+  closed: "&cThe End is now closed."
+  status-open: "&aThe End is currently open."
+  status-closed: "&cThe End is currently closed."
+  blocked: "&cThe End is currently closed."
+  returned: "&eThe End is closed. You were sent to overworld spawn."
+
+mythical:
+  unlock: "&dMYTHICAL UNLOCKED: &f{title}"
+
+bedrock:
+  complete: "&6The bedrock finally broke."
+
+villager:
+  spawned: "&aSpawned a &e{type}&a event villager for &e{event}&a."
+  invalid-type: "&cUnknown villager type."
+  reset: "&aVillager purchase history reset."
+  purchase: "&6Purchased &e{item}&6. This item is now retired globally until reset."
+  open: "&eEvent villager stock is limited globally."
+  expired: "&cThis event villager expired."
+  usage: "&cUsage: /godvillager <spawn|reset|clear> ..."
+  not-owner: "&cThis villager belongs to &e{player}&c."
+  clear: "&aDespawned &e{count}&a active reward villagers."
+
+events:
+  start: "&aName Tag event started. All players begin green."
+  stop: "&cEvent ended: &e{reason}"
+  started-admin: "&aStarted &e{event}&a with &e{villager}&a reward villager."
+  started-broadcast: "&6{name}&e started with &6{participants}&e participants. Reward villager: &6{reward}&e."
+  failed: "&cCould not start the event."
+  invalid: "&cUnknown event or reward villager type."
+  win: "&6You won the event."
+  none: "&eThere is no active server event right now."
+  status: "&eCurrent event: &6{name}&e | Remaining: &6{remaining}&e/&6{participants}&e | Reward: &6{reward}"
+  status-participant: "&e{name}&7 is running. Green remaining: &a{remaining}&7/&a{participants}&7. Reward: &6{reward}"
+  reward-ready: "&aYour &e{event}&a reward villager has been spawned now that you are online."
+  nametag:
+    eliminated: "&cYou turned red and are eliminated."
+  cat:
+    start: "&eCat Hunt started. First valid cat kill wins."
+
+border:
+  updated: "&aWorld border updated."
+
+party:
+  none: "&eYou are not in a party."
+  sent: "&aSent a party invite to &e{player}&a."
+  received: "&e{player} invited you to a PvP party."
+  accepted: "&aJoined &e{player}&a's party."
+  accepted-other: "&a{player} joined your party."
+  left: "&eYou left the party."
+  disbanded: "&cYour party was disbanded."
+  list: "&6Party members: &e{members}"
+  no-invite: "&cYou do not have a matching party invite."
+  invalid-target: "&cThat player is not available."
+  already: "&e{player} is already in your party."
+  pending: "&eA party invite is already pending for &6{player}&e."
+  target-busy: "&c{player} is already in another party."
+  not-leader: "&cOnly the party leader can do that."
+  kick-usage: "&cUsage: /p kick <player>"
+  kick-failed: "&cYou cannot kick that player from the party."
+  kicked: "&eRemoved {player} from the party."
+  kicked-other: "&cYou were removed from {player}'s party."
+  test-invite: "&eUse /pvp test add <name> to add your virtual test players."
+
+pvp:
+  usage: "&cUsage: /pvp [menu|status|modes|kits|leave|rematch|start <mode> <kit>]"
+  disabled: "&cPvP beta is disabled right now."
+  mode-not-found: "&cThat PvP mode is not configured."
+  kit-not-found: "&cThat PvP kit is not available."
+  invalid-party-size: "&c{mode} needs exactly &e{size}&c party members."
+  member-busy: "&c{player} is already in a PvP match."
+  member-in-session: "&c{player} is already busy with another PvP session."
+  member-combat: "&c{player} is combat tagged and cannot queue PvP yet."
+  offline-party-member: "&cEveryone in the party must be online."
+  no-arena: "&cAll PvP arenas are currently busy."
+  no-compatible-modes: "&cNo configured PvP mode matches your current party size."
+  no-kits: "&cNo PvP kits are configured."
+  status: "&7[&cPvP Beta&7] &fState: &e{state}&f | Party: &e{party}&f | Arenas: &e{open}&f open / &e{busy}&f busy"
+  mode-list-header: "&6Configured PvP modes:"
+  mode-list-entry: "&e{mode}&7 -> teams {sizes}&7 | needs &f{players}&7 players | your party: &f{fit}"
+  kit-list-header: "&6Configured PvP kits:"
+  kit-list-entry: "&e{kit}&7 -> &f{items}&7 items"
+  started: "&cPvP beta started: &e{mode}&c with kit &e{kit}&c."
+  player-quit: "&c{player} quit the PvP match."
+  finished: "&6Match complete. Winners: &e{winners}&6."
+  summary-header: "&7[&cPvP Beta&7] &fWinner: &e{winner}&f | Duration: &e{time}s"
+  summary-body: "&fKills: &e{kills}&f | Deaths: &e{deaths}&f | Damage dealt: &e{dealt}&f | Damage taken: &e{taken}"
+  returned: "&aYou have been returned to the SMP."
+  leave-blocked: "&cYou cannot leave an active PvP match. Finish it or die out first."
+  not-in-session: "&cYou are not inside PvP right now."
+  no-rematch: "&cThere is no completed match to rematch."
+  friendly-fire: "&eFriendly fire is disabled inside party PvP."
+  test:
+    no-permission: "&cYou do not have permission to manage PvP test players."
+    usage: "&cUsage: /pvp test <spawn|list|clear> [count]"
+    invalid-count: "&cTest player count must be a number."
+    not-leader: "&cOnly party leaders can add test players to the party."
+    busy: "&cYou cannot change test players while one is already tied to another PvP flow."
+    spawned: "&aAdded &e{count}&a test player(s): &e{names}&a."
+    none: "&eYou do not have any PvP test players yet."
+    list: "&6Your test players: &e{names}"
+    cleared: "&aCleared &e{count}&a test player(s) from your party tools."
+    live-match-blocked: "&cThat PvP mode cannot use your current test-player layout. Try 1v1 or 1v2 for solo admin testing."

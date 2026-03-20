@@ -1,0 +1,47 @@
+villagers:
+  top:
+    trades:
+      helmet:
+        currency: DIAMOND_BLOCK
+        currency-amount: 1
+        emerald-cost: 64
+      chestplate:
+        currency: DIAMOND_BLOCK
+        currency-amount: 1
+        emerald-cost: 64
+  bottom:
+    trades:
+      leggings:
+        currency: DIAMOND_BLOCK
+        currency-amount: 1
+        emerald-cost: 64
+      boots:
+        currency: DIAMOND_BLOCK
+        currency-amount: 1
+        emerald-cost: 64
+      infinite_totem:
+        currency: DIAMOND_BLOCK
+        currency-amount: 1
+        emerald-cost: 64
+  tools:
+    trades:
+      sword:
+        currency: DIAMOND_BLOCK
+        currency-amount: 1
+        emerald-cost: 64
+      axe:
+        currency: DIAMOND_BLOCK
+        currency-amount: 1
+        emerald-cost: 64
+      pickaxe:
+        currency: DIAMOND_BLOCK
+        currency-amount: 1
+        emerald-cost: 64
+      bow:
+        currency: DIAMOND_BLOCK
+        currency-amount: 1
+        emerald-cost: 64
+      enchanted_gapple:
+        currency: DIAMOND_BLOCK
+        currency-amount: 1
+        emerald-cost: 64

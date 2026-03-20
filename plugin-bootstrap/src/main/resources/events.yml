@@ -1,0 +1,7 @@
+events:
+  nametag:
+    enabled: true
+    description: Last green player wins.
+  cat_hunt:
+    enabled: true
+    description: First participant to kill a cat wins.
