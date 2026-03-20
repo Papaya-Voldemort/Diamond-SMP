@@ -77,6 +77,10 @@ Primary runtime switches.
   - `sync-companion-plugin-configs`
   - `motd.line-1`
   - `motd.line-2`
+  - `companion-downloads.enabled`
+  - `companion-downloads.placeholderapi.*`
+  - `companion-downloads.tab.*`
+  - `companion-downloads.custom-join-messages.*`
 
 ### `messages.yml`
 
@@ -153,5 +157,6 @@ Reserved companion file. The actual world and progression switches are currently
 3. Adjust diamond multipliers before generating large amounts of map terrain.
 4. Decide whether `/kit` should be player-facing or admin-only.
 5. Review all messages and rules text so they match your server language.
-6. Decide whether to keep the bundled Diamond SMP branding sync for the MOTD, icon, and companion TAB or CustomJoinMessages configs.
-7. Review `pvp.gui` materials and titles if you want a different PvP menu look after enabling the beta.
+6. Decide whether to keep the bundled Diamond SMP branding sync for the MOTD, icon, companion configs, and companion plugin downloads.
+7. Override any companion download URL in `branding.companion-downloads` if you need a different source or version.
+8. Review `pvp.gui` materials and titles if you want a different PvP menu look after enabling the beta.

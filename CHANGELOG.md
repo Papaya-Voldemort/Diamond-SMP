@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2 - 2026-03-20
+
+- Added real web downloads for the branded companion dependencies: PlaceholderAPI `2.12.2`, TAB `5.5.0`, and Custom Join Messages `17.9.1`
+- Exposed those dependency URLs and jar names in `config.yml` so operators can override them without editing code
+- Added PlaceholderAPI branding sync so the test server's companion plugin stack is seeded end-to-end
+
 ## 1.0.1 - 2026-03-20
 
 - Disabled the party PvP beta by default so servers must explicitly opt in through `config.yml`

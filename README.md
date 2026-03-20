@@ -11,7 +11,7 @@ Diamond SMP is a modular Paper plugin for Minecraft Java `1.21.11` built around 
 - Adds opt-in beta party-based `/pvp` matches in a dedicated arena world with snapshot restore.
 - Adds utility commands for teleport requests, kits, rules, trust-hit, parties, border control, and End access.
 - Supports PlaceholderAPI event placeholders.
-- Syncs the Diamond SMP test server brand pack, including MOTD, server icon, and companion TAB/CustomJoinMessages configs when those plugins are installed.
+- Syncs the Diamond SMP test server brand pack, including MOTD, server icon, branded companion configs, and companion plugin downloads.
 
 ## Core Gameplay Loop
 
@@ -96,7 +96,8 @@ Generated on first boot:
 Branding sync:
 
 - `config.yml -> branding` controls the live MOTD, server icon sync, and companion config sync.
-- Bundled TAB and CustomJoinMessages brand templates mirror the test server at `/Volumes/External Home/Kids Home/SquidServers/Diamond SMP Test Server`.
+- `config.yml -> branding.companion-downloads` controls real web downloads for PlaceholderAPI, TAB, and CustomJoinMessages when those jars are missing.
+- Bundled PlaceholderAPI, TAB, and CustomJoinMessages brand templates mirror the test server at `/Volumes/External Home/Kids Home/SquidServers/Diamond SMP Test Server`.
 
 Operator documentation:
 
@@ -116,19 +117,19 @@ Operator documentation:
 
 Current release:
 
-- `1.0.1`
+- `1.0.2`
 - Paper `1.21.11`
 - Java `21`
-- Deployable jar: `plugin-bootstrap/build/libs/Diamond-SMP-1.0.1.jar`
+- Deployable jar: `plugin-bootstrap/build/libs/Diamond-SMP-1.0.2.jar`
 
 ## Deploy
 
-1. Copy `plugin-bootstrap/build/libs/Diamond-SMP-1.0.1.jar` into `plugins/`.
+1. Copy `plugin-bootstrap/build/libs/Diamond-SMP-1.0.2.jar` into `plugins/`.
 2. Start the server once to generate config and state files.
 3. Edit the generated YAML files inside `plugins/DiamondSMP/`.
 4. Restart the server.
 
-GitHub release notes for `1.0.1` live in `docs/releases/1.0.1.md`.
+GitHub release notes for `1.0.2` live in `docs/releases/1.0.2.md`.
 
 ## Validation Checklist
 

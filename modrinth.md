@@ -54,7 +54,7 @@ Diamond SMP is intended for private or semi-private survival servers that want:
 ## Installation
 
 1. Build the release jar with `./gradlew build`.
-2. Copy `plugin-bootstrap/build/libs/Diamond-SMP-1.0.1.jar` into the server `plugins/` directory.
+2. Copy `plugin-bootstrap/build/libs/Diamond-SMP-1.0.2.jar` into the server `plugins/` directory.
 3. Start the Paper server once to generate config files.
 4. Review and edit the generated files inside `plugins/DiamondSMP/`.
 5. Restart the server after configuration changes.
@@ -103,4 +103,4 @@ Generated on first startup:
 
 ## Release Notes Text
 
-Version `1.0.1` keeps the full Diamond SMP gameplay release intact while moving party PvP into an explicit opt-in beta and bundling the branded MOTD, server icon, and companion TAB or CustomJoinMessages config sync used by the Diamond SMP test server.
+Version `1.0.2` keeps the full Diamond SMP gameplay release intact while also downloading the branded companion dependencies from the web when they are missing, using the exact PlaceholderAPI, TAB, and Custom Join Messages versions from the Diamond SMP test server stack.

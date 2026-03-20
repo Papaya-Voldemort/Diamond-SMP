@@ -18,7 +18,7 @@ To build only the deployable plugin jar:
 
 The deployable artifact is:
 
-- `plugin-bootstrap/build/libs/Diamond-SMP-1.0.1.jar`
+- `plugin-bootstrap/build/libs/Diamond-SMP-1.0.2.jar`
 
 ## Local Runtime Expectations
 

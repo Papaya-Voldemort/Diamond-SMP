@@ -139,7 +139,33 @@ public record PluginSettings(
             new Motd(
                 color(motd == null ? defaults.motd().lineOne() : motd.getString("line-1", defaults.motd().lineOne())),
                 color(motd == null ? defaults.motd().lineTwo() : motd.getString("line-2", defaults.motd().lineTwo()))
-            )
+            ),
+            loadCompanionDownloads(branding.getConfigurationSection("companion-downloads"))
+        );
+    }
+
+    private static CompanionDownloads loadCompanionDownloads(ConfigurationSection section) {
+        CompanionDownloads defaults = CompanionDownloads.defaults();
+        if (section == null) {
+            return defaults;
+        }
+        return new CompanionDownloads(
+            section.getBoolean("enabled", defaults.enabled()),
+            loadCompanionDownload(section.getConfigurationSection("placeholderapi"), defaults.placeholderApi()),
+            loadCompanionDownload(section.getConfigurationSection("tab"), defaults.tab()),
+            loadCompanionDownload(section.getConfigurationSection("custom-join-messages"), defaults.customJoinMessages())
+        );
+    }
+
+    private static CompanionDownload loadCompanionDownload(ConfigurationSection section, CompanionDownload defaults) {
+        if (section == null) {
+            return defaults;
+        }
+        return new CompanionDownload(
+            section.getBoolean("enabled", defaults.enabled()),
+            section.getString("plugin-name", defaults.pluginName()),
+            section.getString("jar-name", defaults.jarName()),
+            section.getString("url", defaults.url())
         );
     }
 
@@ -287,7 +313,8 @@ public record PluginSettings(
         boolean enabled,
         boolean syncServerIcon,
         boolean syncCompanionPluginConfigs,
-        Motd motd
+        Motd motd,
+        CompanionDownloads companionDownloads
     ) {
         public static Branding defaults() {
             return new Branding(
@@ -297,12 +324,51 @@ public record PluginSettings(
                 new Motd(
                     color("&b◆ &fDIAMOND SMP &8| &3THE DEEP END &b◆"),
                     color("&7Custom survival, event gear, and clean competitive progression")
-                )
+                ),
+                CompanionDownloads.defaults()
             );
         }
     }
 
     public record Motd(String lineOne, String lineTwo) {}
+
+    public record CompanionDownloads(
+        boolean enabled,
+        CompanionDownload placeholderApi,
+        CompanionDownload tab,
+        CompanionDownload customJoinMessages
+    ) {
+        public static CompanionDownloads defaults() {
+            return new CompanionDownloads(
+                true,
+                new CompanionDownload(
+                    true,
+                    "PlaceholderAPI",
+                    "PlaceholderAPI-2.12.2.jar",
+                    "https://cdn.modrinth.com/data/lKEzGugV/versions/UmbIiI5H/PlaceholderAPI-2.12.2.jar"
+                ),
+                new CompanionDownload(
+                    true,
+                    "TAB",
+                    "TAB v5.5.0.jar",
+                    "https://cdn.modrinth.com/data/gG7VFbG0/versions/eiJUTmjO/TAB%20v5.5.0.jar"
+                ),
+                new CompanionDownload(
+                    true,
+                    "CustomJoinMessages",
+                    "custom-join-messages-17.9.1.jar",
+                    "https://cdn.modrinth.com/data/PJMIw5vh/versions/nOo9275N/custom-join-messages-17.9.1.jar"
+                )
+            );
+        }
+    }
+
+    public record CompanionDownload(
+        boolean enabled,
+        String pluginName,
+        String jarName,
+        String url
+    ) {}
 
     public record PvpArena(
         int yLevel,

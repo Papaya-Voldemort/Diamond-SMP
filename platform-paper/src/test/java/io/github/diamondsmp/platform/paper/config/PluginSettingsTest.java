@@ -23,6 +23,10 @@ class PluginSettingsTest {
         assertTrue(settings.branding().enabled());
         assertTrue(settings.branding().syncServerIcon());
         assertTrue(settings.branding().syncCompanionPluginConfigs());
+        assertTrue(settings.branding().companionDownloads().enabled());
+        assertEquals("PlaceholderAPI", settings.branding().companionDownloads().placeholderApi().pluginName());
+        assertEquals("TAB", settings.branding().companionDownloads().tab().pluginName());
+        assertEquals("CustomJoinMessages", settings.branding().companionDownloads().customJoinMessages().pluginName());
         assertEquals("§b◆ §fDIAMOND SMP §8| §3THE DEEP END §b◆", settings.branding().motd().lineOne());
         assertEquals("§7Custom survival, event gear, and clean competitive progression", settings.branding().motd().lineTwo());
     }

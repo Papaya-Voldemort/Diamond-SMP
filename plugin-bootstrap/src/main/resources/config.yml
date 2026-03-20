@@ -128,3 +128,20 @@ branding:
   motd:
     line-1: "&b◆ &fDIAMOND SMP &8| &3THE DEEP END &b◆"
     line-2: "&7Custom survival, event gear, and clean competitive progression"
+  companion-downloads:
+    enabled: true
+    placeholderapi:
+      enabled: true
+      plugin-name: "PlaceholderAPI"
+      jar-name: "PlaceholderAPI-2.12.2.jar"
+      url: "https://cdn.modrinth.com/data/lKEzGugV/versions/UmbIiI5H/PlaceholderAPI-2.12.2.jar"
+    tab:
+      enabled: true
+      plugin-name: "TAB"
+      jar-name: "TAB v5.5.0.jar"
+      url: "https://cdn.modrinth.com/data/gG7VFbG0/versions/eiJUTmjO/TAB%20v5.5.0.jar"
+    custom-join-messages:
+      enabled: true
+      plugin-name: "CustomJoinMessages"
+      jar-name: "custom-join-messages-17.9.1.jar"
+      url: "https://cdn.modrinth.com/data/PJMIw5vh/versions/nOo9275N/custom-join-messages-17.9.1.jar"
