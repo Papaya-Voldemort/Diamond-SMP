@@ -52,6 +52,8 @@ This page documents the live command surface exposed by `plugin.yml` and the Pap
 
 Party management command for PvP.
 
+This beta command is disabled until `config.yml -> pvp.enabled` is turned on.
+
 - `/p <player>`: send invite.
 - `/p accept [player]`: accept the latest invite or a specific inviter.
 - `/p list`: show current members.
@@ -62,6 +64,8 @@ Party management command for PvP.
 ### `/pvp`
 
 Now supports both GUI-first and direct-start usage.
+
+This beta command is disabled until `config.yml -> pvp.enabled` is turned on.
 
 - `/pvp`
 - `/pvp menu`

@@ -7,6 +7,7 @@ dependencies {
     compileOnly(libs.paper.api)
     compileOnly(libs.placeholderapi)
 
+    testImplementation(libs.paper.api)
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(platform(libs.junit.bom))

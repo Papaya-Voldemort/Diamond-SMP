@@ -56,7 +56,7 @@ systems:
   border-tools: true
 
 pvp:
-  enabled: true
+  enabled: false
   beta: true
   world-name: diamond_pvp_beta
   party-invite-timeout-seconds: 60
@@ -70,9 +70,9 @@ pvp:
     floor-material: SMOOTH_STONE
     wall-material: BARRIER
   kits:
-    - starter
     - archer
     - tank
+    - swordsman
   gui:
     hub-title: "&4PvP Hub"
     setup-title: "&4PvP Setup"
@@ -120,3 +120,11 @@ pvp:
       display-name: "&e1v2 Trial"
       team-sizes: [1, 2]
       icon: SHIELD
+
+branding:
+  enabled: true
+  sync-server-icon: true
+  sync-companion-plugin-configs: true
+  motd:
+    line-1: "&b◆ &fDIAMOND SMP &8| &3THE DEEP END &b◆"
+    line-2: "&7Custom survival, event gear, and clean competitive progression"

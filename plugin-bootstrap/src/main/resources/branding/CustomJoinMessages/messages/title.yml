@@ -1,0 +1,58 @@
+# Toggles whether titles should be sent.
+Enabled: true
+
+Public:
+  First-Join:
+    1:
+      Permission: cjm.never
+      Radius: -1
+      Max-Players: -1
+      Messages:
+        1:
+          Title: "&b%name%"
+          SubTitle: "&7has joined Diamond SMP for the first time."
+          Fade-In: 8
+          Stay: 50
+          Fade-Out: 10
+  Join:
+    1:
+      Permission: cjm.never
+      Messages:
+        1:
+          Title: "&f%name%"
+          SubTitle: "&7joined Diamond SMP."
+          Fade-In: 8
+          Stay: 40
+          Fade-Out: 10
+  Quit:
+    1:
+      Permission: cjm.never
+      Messages:
+        1:
+          Title: "&f%name%"
+          SubTitle: "&7left Diamond SMP."
+          Fade-In: 8
+          Stay: 40
+          Fade-Out: 10
+
+Private:
+  First-Join:
+    1:
+      Permission: cjm.default
+      Messages:
+        1:
+          Title: "&bWelcome To"
+          SubTitle: "&fDiamond SMP"
+          Fade-In: 10
+          Stay: 70
+          Fade-Out: 10
+  Join:
+    1:
+      Permission: cjm.default
+      Messages:
+        1:
+          Title: "&bWelcome Back"
+          SubTitle: "&f%name%"
+          Fade-In: 10
+          Stay: 50
+          Fade-Out: 10

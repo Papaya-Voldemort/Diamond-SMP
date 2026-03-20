@@ -13,11 +13,11 @@
 
 ## Short Description
 
-Event-driven Paper plugin that replaces normal endgame with admin-run events, reward villagers, god items, and party PvP.
+Event-driven Paper plugin that replaces normal endgame with admin-run events, reward villagers, god items, and an opt-in beta party PvP system.
 
 ## Full Description
 
-Diamond SMP is a modular Paper plugin for Minecraft `1.21.11` designed around a controlled endgame loop. Instead of letting vanilla progression run straight into normal netherite and unrestricted enchants, the server shifts late-game power into scheduled events, owner-bound reward villagers, curated god items, and a dedicated party PvP system.
+Diamond SMP is a modular Paper plugin for Minecraft `1.21.11` designed around a controlled endgame loop. Instead of letting vanilla progression run straight into normal netherite and unrestricted enchants, the server shifts late-game power into scheduled events, owner-bound reward villagers, curated god items, and an opt-in beta party PvP system.
 
 This makes progression more social and more intentional:
 
@@ -25,7 +25,7 @@ This makes progression more social and more intentional:
 - winners unlock limited reward villagers tied to their account
 - villagers sell powerful items that are not part of normal survival progression
 - purchased reward stock retires globally until an admin resets it
-- players can jump into organized party PvP without risking their normal SMP inventory
+- players can opt into organized party PvP without risking their normal SMP inventory
 
 ## Highlights
 
@@ -33,7 +33,7 @@ This makes progression more social and more intentional:
 - Reward villagers with owner checks, limited-time access, and configurable stock
 - Global retirement of purchased villager items until reset
 - Name Tag and Cat Hunt event flows
-- Dedicated `/pvp` arena flow with kits, rematches, and full player-state restore
+- Dedicated opt-in `/pvp` arena flow with kits, rematches, and full player-state restore
 - Survival utility commands including `/tpa`, `/spawn`, `/rules`, `/event`, `/string`, and kits
 - Trust-hit system to stop friendly SMP damage
 - Configurable End access controls and world border administration
@@ -54,7 +54,7 @@ Diamond SMP is intended for private or semi-private survival servers that want:
 ## Installation
 
 1. Build the release jar with `./gradlew build`.
-2. Copy `plugin-bootstrap/build/libs/Diamond-SMP-1.0.0.jar` into the server `plugins/` directory.
+2. Copy `plugin-bootstrap/build/libs/Diamond-SMP-1.0.1.jar` into the server `plugins/` directory.
 3. Start the Paper server once to generate config files.
 4. Review and edit the generated files inside `plugins/DiamondSMP/`.
 5. Restart the server after configuration changes.
@@ -103,4 +103,4 @@ Generated on first startup:
 
 ## Release Notes Text
 
-Version `1.0.0` ships the first full public release of the Diamond SMP Paper plugin. It includes event-driven reward villagers, god items, survival progression locks, party-based PvP with state restore, utility player commands, admin event controls, world border tools, End access management, PlaceholderAPI support, and config-backed gameplay systems across items, kits, villagers, loot, and world rules.
+Version `1.0.1` keeps the full Diamond SMP gameplay release intact while moving party PvP into an explicit opt-in beta and bundling the branded MOTD, server icon, and companion TAB or CustomJoinMessages config sync used by the Diamond SMP test server.

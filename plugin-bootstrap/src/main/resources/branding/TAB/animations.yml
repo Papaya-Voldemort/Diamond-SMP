@@ -1,0 +1,16 @@
+diamond_wave:
+  change-interval: 220
+  texts:
+    - "&8◆&3◆&b◆&f◆&b◆&3◆&8◆"
+    - "&3◆&b◆&f◆&b◆&3◆&8◆&3◆"
+    - "&b◆&f◆&b◆&3◆&8◆&3◆&b◆"
+    - "&f◆&b◆&3◆&8◆&3◆&b◆&f◆"
+    - "&b◆&3◆&8◆&3◆&b◆&f◆&b◆"
+    - "&3◆&8◆&3◆&b◆&f◆&b◆&3◆"
+    - "&8◆&3◆&b◆&f◆&b◆&3◆&8◆"
+
+time:
+  change-interval: 3000
+  texts:
+    - "&7Time &b%time%"
+    - "&7Date &b%date%"

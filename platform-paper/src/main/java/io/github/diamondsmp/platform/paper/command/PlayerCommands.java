@@ -99,6 +99,9 @@ public final class PlayerCommands implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if ((command.getName().equalsIgnoreCase("p") || command.getName().equalsIgnoreCase("pvp")) && !settings.pvp().enabled()) {
+            return List.of();
+        }
         if ((command.getName().equalsIgnoreCase("tpa")
             || command.getName().equalsIgnoreCase("kit")
             || command.getName().equalsIgnoreCase("trust")
@@ -417,6 +420,10 @@ public final class PlayerCommands implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleParty(Player player, String[] args) {
+        if (!settings.pvp().enabled()) {
+            player.sendMessage(messages.prefixed("party.disabled", "&cParty PvP beta is disabled right now."));
+            return true;
+        }
         if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
             return showParty(player);
         }

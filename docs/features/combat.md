@@ -2,6 +2,8 @@
 
 Diamond SMP changes both normal SMP combat and the isolated party PvP system.
 
+The party PvP beta is disabled by default. Enable `config.yml -> pvp.enabled` before expecting `/p` or `/pvp` to work.
+
 ## SMP Combat Rules
 
 ### Combat Tagging

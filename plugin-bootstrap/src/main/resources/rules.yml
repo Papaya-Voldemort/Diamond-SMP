@@ -1,45 +1,45 @@
-title: "&6Diamond SMP Rules"
+title: "&bDiamond SMP Field Manual"
 sections:
   conduct:
-    title: "&cCore Rules"
+    title: "&cProtect The World"
     icon: "&c!"
     lines:
-      - "&fNo griefing player bases."
-      - "&fDo not blow up spawn."
-      - "&fDo not build outside the world border."
-      - "&fDo not kill naked players."
+      - "&fDo not grief player builds or hidden bases."
+      - "&fSpawn is protected. Keep it clean, safe, and intact."
+      - "&fBuild and fight inside the world border only."
+      - "&fDo not farm easy kills on fresh or unarmored players."
   cheating:
-    title: "&4No Cheating"
+    title: "&4Fair Play Only"
     icon: "&4X"
     lines:
-      - "&fNo hacking or client cheats."
-      - "&fNo x-ray, fly, reach, or combat assist."
-      - "&fAsk admins before using unusual mechanics."
+      - "&fNo hacked clients, scripts, macros, or unfair overlays."
+      - "&fNo x-ray, fly, reach, combat assist, or duping."
+      - "&fIf a mechanic looks questionable, ask staff before using it."
   progression:
-    title: "&6Progression"
-    icon: "&6*"
+    title: "&bServer Progression"
+    icon: "&b*"
     lines:
-      - "&fNetherite is removed from normal progression."
-      - "&fGod gear only comes from event villagers."
-      - "&fProtection IV and Sharpness V are event-exclusive."
+      - "&fNetherite is removed from standard progression."
+      - "&fGod gear is earned through server events and reward villagers."
+      - "&fTop-tier enchants stay event-exclusive to keep the season sharp."
   events:
-    title: "&aEvents"
+    title: "&aEvent Cycle"
     icon: "&a#"
     lines:
-      - "&fWinning server events unlocks villager rewards."
-      - "&fEvent villagers despawn after 30 minutes."
-      - "&fPurchased god items retire globally until reset."
+      - "&fWinning live events unlocks limited villager rewards."
+      - "&fEvent villagers despawn after 30 minutes, so move fast."
+      - "&fPurchased god items retire globally until staff reset the pool."
   economy:
-    title: "&eUtility"
+    title: "&eUtility Perks"
     icon: "&e$"
     lines:
-      - "&f/string fills empty slots but has a cooldown."
-      - "&fGolden apple recipe yields 8 apples."
-      - "&f5 string crafts into 5 cobwebs."
+      - "&f/string fills empty inventory slots, then goes on cooldown."
+      - "&fGolden apple crafting is boosted for faster mid-game recovery."
+      - "&fString and cobweb crafting are tuned for PvP utility."
   combat:
-    title: "&dGod Gear Notes"
+    title: "&dCombat Meta"
     icon: "&d+"
     lines:
-      - "&fGod sword grants Strength II while held."
-      - "&fGod bow uses left click for short-bow fire and right click for a buffed bow shot."
-      - "&fInfinite Totem has a server cooldown."
+      - "&fGod swords grant Strength II while held."
+      - "&fGod bows reward pressure with a heavy third-hit combo."
+      - "&fInfinite Totems are powerful, but always run on cooldown."

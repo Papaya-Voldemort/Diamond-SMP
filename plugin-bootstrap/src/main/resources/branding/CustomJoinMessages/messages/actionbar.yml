@@ -1,0 +1,38 @@
+# Toggles whether action bar messages should be sent.
+Enabled: true
+
+Public:
+  First-Join:
+    1:
+      Permission: cjm.never
+      Radius: -1
+      Max-Players: -1
+      Messages:
+        1:
+          Message: "&bNew challenger: &f%name%"
+  Join:
+    1:
+      Permission: cjm.never
+      Messages:
+        1:
+          Message: "&f%name% &7joined the server."
+  Quit:
+    1:
+      Permission: cjm.never
+      Messages:
+        1:
+          Message: "&f%name% &7left the server."
+
+Private:
+  First-Join:
+    1:
+      Permission: cjm.default
+      Messages:
+        1:
+          Message: "&7Use &f/rules &7and watch for event announcements."
+  Join:
+    1:
+      Permission: cjm.default
+      Messages:
+        1:
+          Message: "&7The border is active. Play smart."

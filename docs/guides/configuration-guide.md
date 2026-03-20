@@ -71,14 +71,20 @@ Primary runtime switches.
   - `modes.<mode>.display-name`
   - `modes.<mode>.team-sizes`
   - `modes.<mode>.icon`
+- `branding`
+  - `enabled`
+  - `sync-server-icon`
+  - `sync-companion-plugin-configs`
+  - `motd.line-1`
+  - `motd.line-2`
 
 ### `messages.yml`
 
-Every major player-facing message lives here, including command responses, party flow, villagers, events, End access, and PvP summaries.
+Every major player-facing message lives here, including command responses, party flow, villagers, events, End access, and PvP summaries. The default copy now matches the branded Diamond SMP test server wording.
 
 ### `rules.yml`
 
-Controls the `/rules` GUI title and section cards.
+Controls the `/rules` GUI title and section cards. The bundled defaults match the test server's Field Manual branding.
 
 ### `villagers.yml`
 
@@ -90,7 +96,7 @@ Defines the stock for `top`, `bottom`, and `tools` reward villagers. Each trade 
 
 ### `events.yml`
 
-Documents which event types should be considered enabled and provides short descriptions. Current code ships Name Tag and Cat Hunt.
+Documents which event types should be considered enabled and provides short descriptions. Current code ships Name Tag and Cat Hunt with the same branded descriptions used on the test server.
 
 ### `kits.yml`
 
@@ -143,8 +149,9 @@ Reserved companion file. The actual world and progression switches are currently
 ## Recommended Operator Changes
 
 1. Verify villager prices before your first live season.
-2. Verify PvP mode sizes match the party sizes you want to support.
+2. Decide whether to opt into the PvP beta by turning `pvp.enabled` on.
 3. Adjust diamond multipliers before generating large amounts of map terrain.
 4. Decide whether `/kit` should be player-facing or admin-only.
 5. Review all messages and rules text so they match your server language.
-6. Review `pvp.gui` materials and titles if you want a different PvP menu look.
+6. Decide whether to keep the bundled Diamond SMP branding sync for the MOTD, icon, and companion TAB or CustomJoinMessages configs.
+7. Review `pvp.gui` materials and titles if you want a different PvP menu look after enabling the beta.

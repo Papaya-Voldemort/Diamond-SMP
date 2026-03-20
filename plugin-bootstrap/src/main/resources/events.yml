@@ -1,7 +1,7 @@
 events:
   nametag:
     enabled: true
-    description: Last green player wins.
+    description: Last green player standing wins the round.
   cat_hunt:
     enabled: true
-    description: First participant to kill a cat wins.
+    description: First participant to secure a valid cat kill wins.

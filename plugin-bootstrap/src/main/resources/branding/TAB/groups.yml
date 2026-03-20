@@ -1,0 +1,30 @@
+owner:
+  tabprefix: "&8[&cOwner&8] &f"
+  tagprefix: "&8[&cOwner&8] &f"
+
+admin:
+  tabprefix: "&8[&4Admin&8] &f"
+  tagprefix: "&8[&4Admin&8] &f"
+
+mod:
+  tabprefix: "&8[&5Mod&8] &f"
+  tagprefix: "&8[&5Mod&8] &f"
+
+helper:
+  tabprefix: "&8[&9Helper&8] &f"
+  tagprefix: "&8[&9Helper&8] &f"
+
+vip:
+  tabprefix: "&8[&6VIP&8] &f"
+  tagprefix: "&8[&6VIP&8] &f"
+
+default:
+  tabprefix: "&8[&bSurvivor&8] &f"
+  tagprefix: "&8[&bSurvivor&8] &f"
+
+_DEFAULT_:
+  tabprefix: "&8[&bSurvivor&8] &f"
+  tagprefix: "&8[&bSurvivor&8] &f"
+  customtabname: "%player%"
+  tabsuffix: ""
+  tagsuffix: ""

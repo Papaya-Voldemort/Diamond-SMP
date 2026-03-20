@@ -1,6 +1,6 @@
 # Diamond SMP
 
-Diamond SMP is a modular Paper plugin for Minecraft Java `1.21.11` built around event-driven endgame progression. Instead of letting normal survival reach full netherite and top-tier enchants, the server pushes late-game power into admin-run events, reward villagers, custom god items, and a separate party PvP flow.
+Diamond SMP is a modular Paper plugin for Minecraft Java `1.21.11` built around event-driven endgame progression. Instead of letting normal survival reach full netherite and top-tier enchants, the server pushes late-game power into admin-run events, reward villagers, custom god items, and an opt-in beta party PvP flow.
 
 ## What the Plugin Actually Does
 
@@ -8,9 +8,10 @@ Diamond SMP is a modular Paper plugin for Minecraft Java `1.21.11` built around 
 - Spawns owner-bound reward villagers that sell limited stock and retire purchases globally.
 - Blocks netherite progression, restricted enchants, and Strength II brewing/consumption.
 - Rewrites diamond generation pressure with chunk-time ore amplification and extra drop multipliers.
-- Adds party-based `/pvp` matches in a dedicated arena world with snapshot restore.
+- Adds opt-in beta party-based `/pvp` matches in a dedicated arena world with snapshot restore.
 - Adds utility commands for teleport requests, kits, rules, trust-hit, parties, border control, and End access.
 - Supports PlaceholderAPI event placeholders.
+- Syncs the Diamond SMP test server brand pack, including MOTD, server icon, and companion TAB/CustomJoinMessages configs when those plugins are installed.
 
 ## Core Gameplay Loop
 
@@ -45,6 +46,7 @@ Diamond SMP is a modular Paper plugin for Minecraft Java `1.21.11` built around 
 
 ### Party PvP
 
+- Disabled by default until `config.yml -> pvp.enabled` is turned on.
 - `/p` manages invitations, accepts, kicks, disbands, and party listings.
 - `/pvp` opens a hub menu with compatible modes, rematch access, status info, and return options.
 - `/pvp start <mode> <kit>` still supports direct launch for power users.
@@ -91,6 +93,11 @@ Generated on first boot:
 - `integrations.yml`
 - `world-rules.yml`
 
+Branding sync:
+
+- `config.yml -> branding` controls the live MOTD, server icon sync, and companion config sync.
+- Bundled TAB and CustomJoinMessages brand templates mirror the test server at `/Volumes/External Home/Kids Home/SquidServers/Diamond SMP Test Server`.
+
 Operator documentation:
 
 - [Configuration Guide](/Volumes/External%20Home/Kids%20Home/dev/Diamond-SMP/docs/guides/configuration-guide.md)
@@ -109,19 +116,19 @@ Operator documentation:
 
 Current release:
 
-- `1.0.0`
+- `1.0.1`
 - Paper `1.21.11`
 - Java `21`
-- Deployable jar: `plugin-bootstrap/build/libs/Diamond-SMP-1.0.0.jar`
+- Deployable jar: `plugin-bootstrap/build/libs/Diamond-SMP-1.0.1.jar`
 
 ## Deploy
 
-1. Copy `plugin-bootstrap/build/libs/Diamond-SMP-1.0.0.jar` into `plugins/`.
+1. Copy `plugin-bootstrap/build/libs/Diamond-SMP-1.0.1.jar` into `plugins/`.
 2. Start the server once to generate config and state files.
 3. Edit the generated YAML files inside `plugins/DiamondSMP/`.
 4. Restart the server.
 
-GitHub release notes for `1.0.0` live in `docs/releases/1.0.0.md`.
+GitHub release notes for `1.0.1` live in `docs/releases/1.0.1.md`.
 
 ## Validation Checklist
 

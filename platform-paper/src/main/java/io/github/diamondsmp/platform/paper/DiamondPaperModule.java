@@ -13,11 +13,13 @@ import io.github.diamondsmp.platform.paper.gui.PvpGui;
 import io.github.diamondsmp.platform.paper.gui.RulesGui;
 import io.github.diamondsmp.platform.paper.item.GodItemRegistry;
 import io.github.diamondsmp.platform.paper.listener.GameplayListener;
+import io.github.diamondsmp.platform.paper.listener.BrandingListener;
 import io.github.diamondsmp.platform.paper.listener.GuiAndVillagerListener;
 import io.github.diamondsmp.platform.paper.listener.PvpListener;
 import io.github.diamondsmp.platform.paper.listener.RestrictionListener;
 import io.github.diamondsmp.platform.paper.placeholder.DiamondPlaceholderExpansion;
 import io.github.diamondsmp.platform.paper.service.CombatStateService;
+import io.github.diamondsmp.platform.paper.service.BrandingService;
 import io.github.diamondsmp.platform.paper.service.CooldownService;
 import io.github.diamondsmp.platform.paper.service.EndAccessService;
 import io.github.diamondsmp.platform.paper.service.KitService;
@@ -56,10 +58,12 @@ public final class DiamondPaperModule {
         context.lifecycle().mark(LifecyclePhase.LOAD_CONFIG);
 
         PluginSettings settings = PluginSettings.load(plugin.getConfig());
+        BrandingService brandingService = new BrandingService(plugin, settings.branding());
         MessageBundle messages = MessageBundle.load(load("messages.yml"));
         RulesBook rulesBook = RulesBook.load(load("rules.yml"));
         YamlConfiguration villagersConfig = load("villagers.yml");
         YamlConfiguration kitsConfig = load("kits.yml");
+        brandingService.applyStartupBranding();
 
         GodItemRegistry godItems = new GodItemRegistry(plugin);
         CooldownService cooldowns = new CooldownService();
@@ -80,6 +84,7 @@ public final class DiamondPaperModule {
 
         context.lifecycle().mark(LifecyclePhase.REGISTER_LISTENERS);
         registerListeners(
+            new BrandingListener(brandingService),
             new GameplayListener(plugin, settings, messages, godItems, cooldowns, combatState, trustService, endAccessService, eventManager, mythicalAdvancements, pvpService),
             new RestrictionListener(settings, godItems),
             new GuiAndVillagerListener(rulesGui, villagerService, messages),

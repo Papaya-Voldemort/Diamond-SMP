@@ -1,0 +1,42 @@
+# Toggles whether chat messages should be sent.
+Enabled: true
+
+Public:
+  Send-To-Console: true
+  First-Join:
+    1:
+      Permission: cjm.default
+      Radius: -1
+      Max-Players: -1
+      Messages:
+        1:
+          - "&8[&bDiamond&fSMP&8] &f%name% &bentered The Deep End for the first time. &8(&b#%uniquejoins%&8)"
+  Join:
+    1:
+      Permission: cjm.default
+      Messages:
+        1:
+          - "&8[&bDiamond&fSMP&8] &f%name% &7joined the server."
+  Quit:
+    1:
+      Permission: cjm.default
+      Messages:
+        1:
+          - "&8[&bDiamond&fSMP&8] &f%name% &7left the server."
+
+Private:
+  First-Join:
+    1:
+      Permission: cjm.default
+      Messages:
+        1:
+          - "&bWelcome to Diamond SMP."
+          - "&7Survive hard, win events, and watch the world border."
+          - "&7Use &f/tpa &7to move, and ask staff if anything feels broken."
+  Join:
+    1:
+      Permission: cjm.default
+      Messages:
+        1:
+          - "&bWelcome back to Diamond SMP."
+          - "&7Your tablist and sidebar are active. Gear up."

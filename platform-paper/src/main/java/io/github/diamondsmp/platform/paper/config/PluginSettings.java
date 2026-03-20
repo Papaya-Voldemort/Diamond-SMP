@@ -19,7 +19,8 @@ public record PluginSettings(
     Kits kits,
     BorderDefaults borderDefaults,
     Toggles toggles,
-    Pvp pvp
+    Pvp pvp,
+    Branding branding
 ) {
     public static PluginSettings load(FileConfiguration config) {
         return new PluginSettings(
@@ -68,7 +69,8 @@ public record PluginSettings(
                 config.getBoolean("systems.rules-gui", true),
                 config.getBoolean("systems.border-tools", true)
             ),
-            loadPvp(config)
+            loadPvp(config),
+            loadBranding(config)
         );
     }
 
@@ -103,7 +105,7 @@ public record PluginSettings(
             modes.putAll(Pvp.defaults().modes());
         }
         return new Pvp(
-            pvp.getBoolean("enabled", true),
+            pvp.getBoolean("enabled", false),
             pvp.getBoolean("beta", true),
             pvp.getString("world-name", "diamond_pvp_beta"),
             java.time.Duration.ofSeconds(pvp.getLong("party-invite-timeout-seconds", 60L)),
@@ -120,6 +122,24 @@ public record PluginSettings(
             pvp.getStringList("kits"),
             Map.copyOf(modes),
             loadPvpGui(pvp.getConfigurationSection("gui"))
+        );
+    }
+
+    private static Branding loadBranding(FileConfiguration config) {
+        ConfigurationSection branding = config.getConfigurationSection("branding");
+        if (branding == null) {
+            return Branding.defaults();
+        }
+        Branding defaults = Branding.defaults();
+        ConfigurationSection motd = branding.getConfigurationSection("motd");
+        return new Branding(
+            branding.getBoolean("enabled", defaults.enabled()),
+            branding.getBoolean("sync-server-icon", defaults.syncServerIcon()),
+            branding.getBoolean("sync-companion-plugin-configs", defaults.syncCompanionPluginConfigs()),
+            new Motd(
+                color(motd == null ? defaults.motd().lineOne() : motd.getString("line-1", defaults.motd().lineOne())),
+                color(motd == null ? defaults.motd().lineTwo() : motd.getString("line-2", defaults.motd().lineTwo()))
+            )
         );
     }
 
@@ -250,7 +270,7 @@ public record PluginSettings(
             modes.put("3v3", new PvpMode("3v3", color("&53v3 Skirmish"), List.of(3, 3), Material.NETHERITE_SWORD));
             modes.put("1v2", new PvpMode("1v2", color("&e1v2 Trial"), List.of(1, 2), Material.SHIELD));
             return new Pvp(
-                true,
+                false,
                 true,
                 "diamond_pvp_beta",
                 Duration.ofSeconds(60L),
@@ -262,6 +282,27 @@ public record PluginSettings(
             );
         }
     }
+
+    public record Branding(
+        boolean enabled,
+        boolean syncServerIcon,
+        boolean syncCompanionPluginConfigs,
+        Motd motd
+    ) {
+        public static Branding defaults() {
+            return new Branding(
+                true,
+                true,
+                true,
+                new Motd(
+                    color("&b◆ &fDIAMOND SMP &8| &3THE DEEP END &b◆"),
+                    color("&7Custom survival, event gear, and clean competitive progression")
+                )
+            );
+        }
+    }
+
+    public record Motd(String lineOne, String lineTwo) {}
 
     public record PvpArena(
         int yLevel,

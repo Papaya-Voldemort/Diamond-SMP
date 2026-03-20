@@ -1,0 +1,159 @@
+header-footer:
+  enabled: true
+  designs:
+    default:
+      display-condition: '%world%!=disabledworld'
+      header: []
+      footer: []
+tablist-name-formatting:
+  enabled: true
+  disable-condition: '%world%=disabledworld'
+scoreboard-teams:
+  enabled: false
+  enable-collision: true
+  invisible-nametags: false
+  sorting-types:
+  - GROUPS:owner,admin,mod,helper,vip,default
+  - PLACEHOLDER_A_TO_Z:%player%
+  case-sensitive-sorting: true
+  can-see-friendly-invisibles: false
+  disable-condition: '%world%=disabledworld'
+playerlist-objective:
+  enabled: true
+  value: '%ping%'
+  fancy-value: '&7Ping: &b%ping%'
+  title: Diamond
+  render-type: INTEGER
+  disable-condition: '%world%=disabledworld'
+belowname-objective:
+  enabled: false
+  value: '%health%'
+  fancy-value: '&c%health%'
+  fancy-value-default: NPC
+  title: '&cHealth'
+  disable-condition: '%world%=disabledworld'
+prevent-spectator-effect:
+  enabled: false
+bossbar:
+  enabled: false
+  toggle-command: /bossbar
+  remember-toggle-choice: false
+  hidden-by-default: false
+  bars:
+    ServerInfo:
+      style: PROGRESS
+      color: BLUE
+      progress: '100'
+      text: '&bDiamond SMP'
+scoreboard:
+  enabled: true
+  toggle-command: /sb
+  remember-toggle-choice: true
+  hidden-by-default: false
+  delay-on-join-milliseconds: 1200
+  scoreboards:
+    scoreboard:
+      title: <#7cecff>&lDIAMOND SMP
+      lines:
+      - '&8%date%'
+      - '%animation:diamond_wave%'
+      - '&7Player: &b%player%'
+      - '&7Online: &b%online%'
+      - '&7Staff: &b%staffonline%'
+      - '&7World: &b%world%'
+      - '&7Ping: &b%ping%ms'
+      - '&7TPS: &b%tps%'
+      - '&7Memory: &b%memory-used%MB'
+      - ''
+      - '&fThe Deep End'
+      - '%animation:diamond_wave%'
+layout:
+  enabled: false
+  direction: COLUMNS
+  default-skin: mineskin:37e93c8e12cd426cb28fce31969e0674
+  enable-remaining-players-text: true
+  remaining-players-text: '... and %s more'
+  empty-slot-ping-value: 1000
+  layouts:
+    default:
+      slot-count: 80
+      fixed-slots:
+      - 1|&bDiamond SMP
+      groups:
+        players:
+          slots:
+          - 1-80
+ping-spoof:
+  enabled: false
+  value: 0
+global-playerlist:
+  enabled: false
+  display-others-as-spectators: false
+  display-vanished-players-as-spectators: true
+  isolate-unlisted-servers: false
+  update-latency: false
+  spy-servers:
+  - spyserver1
+  - spyserver2
+  server-groups:
+    lobbies:
+    - lobby1
+    - lobby2
+    group2:
+    - server1
+    - server2
+placeholders:
+  date-format: MM/dd/yyyy
+  time-format: h:mm a
+  time-offset: 0
+  register-tab-expansion: false
+placeholder-output-replacements:
+  '%essentials_vanished%':
+    'yes': '&7| Vanished'
+    'no': ''
+conditions:
+  nick:
+    conditions:
+    - '%player%=%essentials_nickname%'
+    true: '%player%'
+    false: ~%essentials_nickname%
+placeholder-refresh-intervals:
+  default-refresh-interval: 500
+  '%player_ping%': 1000
+assign-groups-by-permissions: false
+primary-group-finding-list:
+- owner
+- admin
+- mod
+- helper
+- vip
+- default
+permission-refresh-interval: 1000
+debug: false
+mysql:
+  enabled: false
+  host: 127.0.0.1
+  port: 3306
+  database: tab
+  username: user
+  password: password
+  useSSL: true
+proxy-support:
+  enabled: false
+  channel-name-suffix: TAB
+  type: PLUGIN
+  plugin:
+    name: RedisBungee
+  redis:
+    url: redis://:password@localhost:6379/0
+  rabbitmq:
+    exchange: plugin
+    url: amqp://guest:guest@localhost:5672/%2F
+components:
+  minimessage-support: true
+  disable-shadow-for-heads: true
+use-online-uuid-in-tablist: true
+compensate-for-packetevents-bug: false
+config-version: 5
+per-world-playerlist:
+  enabled: false
