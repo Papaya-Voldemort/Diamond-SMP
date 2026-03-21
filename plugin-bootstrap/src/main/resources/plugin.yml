@@ -77,6 +77,10 @@ commands:
     description: Open or close access to the End.
     usage: /end <open|close|status>
     permission: diamondsmp.admin.end
+  dragonegg:
+    description: Toggle special dragon egg rules.
+    usage: /dragonegg <enable|disable|status>
+    permission: diamondsmp.admin.dragonegg
   god:
     description: Owner control panel.
     usage: /god
@@ -110,6 +114,8 @@ permissions:
   diamondsmp.admin.godtest:
     default: op
   diamondsmp.admin.end:
+    default: op
+  diamondsmp.admin.dragonegg:
     default: op
   diamondsmp.admin.pvp-test:
     default: op

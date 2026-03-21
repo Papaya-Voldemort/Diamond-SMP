@@ -160,6 +160,13 @@ public final class GodMenuListener implements Listener {
                 });
                 return;
             }
+            case 42 -> {
+                ownerControl.audit(player, "toggle-dragon-egg-rules");
+                ownerControl.setDragonEggRulesEnabled(!ownerControl.dragonEggRulesEnabled());
+                notify(player, ownerControl.dragonEggRulesEnabled()
+                    ? "Dragon egg rules are now enabled."
+                    : "Dragon egg rules are now disabled.");
+            }
             case 49 -> notify(player, "Refreshing owner controls.");
             case 53 -> {
                 player.closeInventory();

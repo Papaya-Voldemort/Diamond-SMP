@@ -15,6 +15,7 @@ import io.github.diamondsmp.platform.paper.gui.GodMenuGui;
 import io.github.diamondsmp.platform.paper.item.GodItemRegistry;
 import io.github.diamondsmp.platform.paper.listener.GameplayListener;
 import io.github.diamondsmp.platform.paper.listener.BrandingListener;
+import io.github.diamondsmp.platform.paper.listener.DragonEggListener;
 import io.github.diamondsmp.platform.paper.listener.GodMenuListener;
 import io.github.diamondsmp.platform.paper.listener.GuiAndVillagerListener;
 import io.github.diamondsmp.platform.paper.listener.PvpListener;
@@ -23,6 +24,7 @@ import io.github.diamondsmp.platform.paper.placeholder.DiamondPlaceholderExpansi
 import io.github.diamondsmp.platform.paper.service.CombatStateService;
 import io.github.diamondsmp.platform.paper.service.BrandingService;
 import io.github.diamondsmp.platform.paper.service.CooldownService;
+import io.github.diamondsmp.platform.paper.service.DragonEggService;
 import io.github.diamondsmp.platform.paper.service.EndAccessService;
 import io.github.diamondsmp.platform.paper.service.KitService;
 import io.github.diamondsmp.platform.paper.service.OwnerControlService;
@@ -74,8 +76,10 @@ public final class DiamondPaperModule {
         TeleportRequestService teleportRequests = new TeleportRequestService();
         TrustService trustService = new TrustService();
         CombatStateService combatState = new CombatStateService();
+        DragonEggService dragonEggService = new DragonEggService(plugin);
         EndAccessService endAccessService = new EndAccessService(plugin);
         OwnerControlService ownerControl = new OwnerControlService(plugin, settings);
+        ownerControl.attachDragonEggs(dragonEggService);
         OwnerRecoveryExportService ownerRecoveryExportService = new OwnerRecoveryExportService(plugin);
         KitService kitService = new KitService(plugin, kitsConfig);
         PartyService partyService = new PartyService();
@@ -92,10 +96,11 @@ public final class DiamondPaperModule {
         context.lifecycle().mark(LifecyclePhase.REGISTER_LISTENERS);
         registerListeners(
             new BrandingListener(brandingService),
-            new GameplayListener(plugin, settings, messages, godItems, cooldowns, combatState, trustService, endAccessService, eventManager, mythicalAdvancements, pvpService),
+            new GameplayListener(plugin, settings, messages, godItems, cooldowns, combatState, trustService, dragonEggService, endAccessService, eventManager, mythicalAdvancements, pvpService),
             new RestrictionListener(settings, godItems),
             new GuiAndVillagerListener(rulesGui, villagerService, messages),
             new PvpListener(pvpGui, pvpService),
+            new DragonEggListener(dragonEggService, messages),
             new GodMenuListener(
                 plugin,
                 godMenuGui,
@@ -160,6 +165,7 @@ public final class DiamondPaperModule {
         registerCommand("dsborder", adminCommands, adminCommands);
         registerCommand("godtest", adminCommands, adminCommands);
         registerCommand("end", adminCommands, adminCommands);
+        registerCommand("dragonegg", adminCommands, adminCommands);
         registerCommand("god", adminCommands, adminCommands);
 
         registerRecipes();

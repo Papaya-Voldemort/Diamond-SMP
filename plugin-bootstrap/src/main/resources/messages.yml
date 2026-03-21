@@ -102,6 +102,14 @@ events:
 border:
   updated: "&aWorld border updated."
 
+dragon-egg:
+  restricted: "&cThe dragon egg must stay in a player inventory or on the ground."
+  logout-drop: "&6Your dragon egg stack was dropped at your logout location. Count: &f{count}"
+  enabled: "&aDragon egg rules are now enabled."
+  disabled: "&eDragon egg rules are now disabled."
+  status-on: "&aDragon egg rules are enabled."
+  status-off: "&eDragon egg rules are disabled."
+
 party:
   disabled: "&cParty PvP beta is disabled right now."
   none: "&eYou are not in a party."

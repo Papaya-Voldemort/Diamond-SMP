@@ -87,6 +87,16 @@ public final class GodMenuGui {
             ChatColor.GRAY + "server configs, plugins, and worlds.",
             ChatColor.YELLOW + "Action is logged to owner-audit.log."
         )));
+        inventory.setItem(42, create(
+            dragonEggRulesMaterial(ownerControl),
+            dragonEggRulesName(ownerControl),
+            List.of(
+                ChatColor.GRAY + "Dragon egg gets +5 hearts in inventory.",
+                ChatColor.GRAY + "Egg cannot stay in containers.",
+                ChatColor.GRAY + "Logout drops it at your location.",
+                ChatColor.YELLOW + "Click to toggle special rules."
+            )
+        ));
 
         inventory.setItem(49, create(Material.CLOCK, ChatColor.GREEN + "Refresh", List.of(
             ChatColor.GRAY + "Rebuild this control panel."
@@ -107,6 +117,14 @@ public final class GodMenuGui {
 
     private String statusLine(boolean enabled) {
         return ChatColor.GRAY + "State: " + (enabled ? ChatColor.GREEN + "Enabled" : ChatColor.RED + "Disabled");
+    }
+
+    private Material dragonEggRulesMaterial(OwnerControlService ownerControl) {
+        return ownerControl.dragonEggRulesEnabled() ? Material.DRAGON_EGG : Material.EGG;
+    }
+
+    private String dragonEggRulesName(OwnerControlService ownerControl) {
+        return statusName("Dragon Egg Rules", ownerControl.dragonEggRulesEnabled());
     }
 
     private void fill(Inventory inventory, Material material, String name) {

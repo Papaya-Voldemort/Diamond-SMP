@@ -9,6 +9,7 @@ import io.github.diamondsmp.platform.paper.item.GodItemRegistry;
 import io.github.diamondsmp.platform.paper.item.GodItemType;
 import io.github.diamondsmp.platform.paper.service.CombatStateService;
 import io.github.diamondsmp.platform.paper.service.CooldownService;
+import io.github.diamondsmp.platform.paper.service.DragonEggService;
 import io.github.diamondsmp.platform.paper.service.EndAccessService;
 import io.github.diamondsmp.platform.paper.service.PvpService;
 import io.github.diamondsmp.platform.paper.service.TrustService;
@@ -77,6 +78,7 @@ public final class GameplayListener implements Listener {
     private final CooldownService cooldowns;
     private final CombatStateService combatState;
     private final TrustService trustService;
+    private final DragonEggService dragonEggs;
     private final EndAccessService endAccessService;
     private final ServerEventManager eventManager;
     private final MythicalAdvancementService mythicalAdvancements;
@@ -92,6 +94,7 @@ public final class GameplayListener implements Listener {
         CooldownService cooldowns,
         CombatStateService combatState,
         TrustService trustService,
+        DragonEggService dragonEggs,
         EndAccessService endAccessService,
         ServerEventManager eventManager,
         MythicalAdvancementService mythicalAdvancements,
@@ -104,6 +107,7 @@ public final class GameplayListener implements Listener {
         this.cooldowns = cooldowns;
         this.combatState = combatState;
         this.trustService = trustService;
+        this.dragonEggs = dragonEggs;
         this.endAccessService = endAccessService;
         this.eventManager = eventManager;
         this.mythicalAdvancements = mythicalAdvancements;
@@ -378,6 +382,7 @@ public final class GameplayListener implements Listener {
         applyArmorEffect(player, inventory.getLeggings(), GodItemType.LEGGINGS, PotionEffectType.RESISTANCE, 1);
         applyArmorEffect(player, inventory.getBoots(), GodItemType.BOOTS, PotionEffectType.SPEED, 1);
         applyHeldEffect(player, inventory.getItemInMainHand(), GodItemType.SWORD, PotionEffectType.STRENGTH, 0);
+        applyDragonEggEffect(player);
     }
 
     private void updateCombatStatus(Player player) {
@@ -405,6 +410,20 @@ public final class GameplayListener implements Listener {
     private void applyHeldEffect(Player player, ItemStack item, GodItemType type, PotionEffectType effect, int amplifier) {
         if (godItems.isGodItem(item, type)) {
             player.addPotionEffect(new PotionEffect(effect, 60, amplifier, true, false, true));
+        }
+    }
+
+    private void applyDragonEggEffect(Player player) {
+        if (dragonEggs.specialRulesEnabled() && dragonEggs.hasDragonEgg(player)) {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 60, 4, true, false, true));
+            return;
+        }
+        if (!godItems.isGodItem(player.getInventory().getChestplate(), GodItemType.CHESTPLATE)
+            && player.hasPotionEffect(PotionEffectType.HEALTH_BOOST)) {
+            PotionEffect active = player.getPotionEffect(PotionEffectType.HEALTH_BOOST);
+            if (active != null && active.getDuration() <= 70 && active.getAmplifier() == 4) {
+                player.removePotionEffect(PotionEffectType.HEALTH_BOOST);
+            }
         }
     }
 

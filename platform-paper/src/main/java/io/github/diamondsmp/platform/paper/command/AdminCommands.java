@@ -71,6 +71,7 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
             case "dsborder" -> handleBorder(sender, args);
             case "godtest" -> handleGodTest(sender);
             case "end" -> handleEnd(sender, args);
+            case "dragonegg" -> handleDragonEgg(sender, args);
             case "god" -> handleGod(sender);
             default -> false;
         };
@@ -83,8 +84,33 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
             case "serverevent" -> completeServerEvent(args);
             case "dsborder" -> args.length == 1 ? List.of("size", "center", "warning", "reset") : List.of();
             case "end" -> args.length == 1 ? List.of("open", "close", "status") : List.of();
+            case "dragonegg" -> args.length == 1 ? List.of("enable", "disable", "status") : List.of();
             default -> List.of();
         };
+    }
+
+    private boolean handleDragonEgg(CommandSender sender, String[] args) {
+        if (args.length == 0 || args[0].equalsIgnoreCase("status")) {
+            sender.sendMessage(messages.prefixed(
+                ownerControl.dragonEggRulesEnabled() ? "dragon-egg.status-on" : "dragon-egg.status-off",
+                ownerControl.dragonEggRulesEnabled()
+                    ? "&aDragon egg rules are enabled."
+                    : "&eDragon egg rules are disabled."
+            ));
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("enable")) {
+            ownerControl.setDragonEggRulesEnabled(true);
+            sender.sendMessage(messages.prefixed("dragon-egg.enabled", "&aDragon egg rules are now enabled."));
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("disable")) {
+            ownerControl.setDragonEggRulesEnabled(false);
+            sender.sendMessage(messages.prefixed("dragon-egg.disabled", "&eDragon egg rules are now disabled."));
+            return true;
+        }
+        sender.sendMessage("/dragonegg <enable|disable|status>");
+        return true;
     }
 
     private boolean handleGod(CommandSender sender) {

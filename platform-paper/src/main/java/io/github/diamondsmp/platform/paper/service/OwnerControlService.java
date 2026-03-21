@@ -21,6 +21,7 @@ public final class OwnerControlService {
     private final String ownerName;
     private final Set<UUID> ownerUuids;
     private final File auditLogFile;
+    private DragonEggService dragonEggs;
     private boolean partyEnabled;
     private boolean pvpEnabled;
 
@@ -72,6 +73,20 @@ public final class OwnerControlService {
     public void setGlobalPvp(boolean enabled) {
         Bukkit.getWorlds().forEach(world -> world.setPVP(enabled));
         plugin.getLogger().info("Owner control set global PvP to " + enabled + ".");
+    }
+
+    public void attachDragonEggs(DragonEggService dragonEggs) {
+        this.dragonEggs = dragonEggs;
+    }
+
+    public boolean dragonEggRulesEnabled() {
+        return dragonEggs != null && dragonEggs.specialRulesEnabled();
+    }
+
+    public void setDragonEggRulesEnabled(boolean enabled) {
+        if (dragonEggs != null) {
+            dragonEggs.setSpecialRulesEnabled(enabled);
+        }
     }
 
     public void audit(Player player, String action) {
