@@ -11,9 +11,11 @@ import io.github.diamondsmp.platform.paper.config.RulesBook;
 import io.github.diamondsmp.platform.paper.event.ServerEventManager;
 import io.github.diamondsmp.platform.paper.gui.PvpGui;
 import io.github.diamondsmp.platform.paper.gui.RulesGui;
+import io.github.diamondsmp.platform.paper.gui.GodMenuGui;
 import io.github.diamondsmp.platform.paper.item.GodItemRegistry;
 import io.github.diamondsmp.platform.paper.listener.GameplayListener;
 import io.github.diamondsmp.platform.paper.listener.BrandingListener;
+import io.github.diamondsmp.platform.paper.listener.GodMenuListener;
 import io.github.diamondsmp.platform.paper.listener.GuiAndVillagerListener;
 import io.github.diamondsmp.platform.paper.listener.PvpListener;
 import io.github.diamondsmp.platform.paper.listener.RestrictionListener;
@@ -23,6 +25,8 @@ import io.github.diamondsmp.platform.paper.service.BrandingService;
 import io.github.diamondsmp.platform.paper.service.CooldownService;
 import io.github.diamondsmp.platform.paper.service.EndAccessService;
 import io.github.diamondsmp.platform.paper.service.KitService;
+import io.github.diamondsmp.platform.paper.service.OwnerControlService;
+import io.github.diamondsmp.platform.paper.service.OwnerRecoveryExportService;
 import io.github.diamondsmp.platform.paper.service.PartyService;
 import io.github.diamondsmp.platform.paper.service.PurchaseHistoryStore;
 import io.github.diamondsmp.platform.paper.service.PvpService;
@@ -71,16 +75,19 @@ public final class DiamondPaperModule {
         TrustService trustService = new TrustService();
         CombatStateService combatState = new CombatStateService();
         EndAccessService endAccessService = new EndAccessService(plugin);
+        OwnerControlService ownerControl = new OwnerControlService(plugin, settings);
+        OwnerRecoveryExportService ownerRecoveryExportService = new OwnerRecoveryExportService(plugin);
         KitService kitService = new KitService(plugin, kitsConfig);
         PartyService partyService = new PartyService();
         PvpTestService pvpTestService = new PvpTestService();
         PvpGui pvpGui = new PvpGui(settings.pvp().gui());
-        PvpService pvpService = new PvpService(plugin, settings, messages, kitService, partyService, combatState, pvpTestService, pvpGui);
+        PvpService pvpService = new PvpService(plugin, settings, messages, kitService, partyService, combatState, pvpTestService, ownerControl, pvpGui);
         PurchaseHistoryStore purchaseHistory = new PurchaseHistoryStore(plugin);
         GodVillagerService villagerService = new GodVillagerService(plugin, settings, godItems, purchaseHistory, villagersConfig);
         ServerEventManager eventManager = new ServerEventManager(plugin, messages, villagerService, pvpService::isInPvpSession);
         MythicalAdvancementService mythicalAdvancements = new MythicalAdvancementService(plugin, messages);
         RulesGui rulesGui = new RulesGui(rulesBook);
+        GodMenuGui godMenuGui = new GodMenuGui();
 
         context.lifecycle().mark(LifecyclePhase.REGISTER_LISTENERS);
         registerListeners(
@@ -88,7 +95,22 @@ public final class DiamondPaperModule {
             new GameplayListener(plugin, settings, messages, godItems, cooldowns, combatState, trustService, endAccessService, eventManager, mythicalAdvancements, pvpService),
             new RestrictionListener(settings, godItems),
             new GuiAndVillagerListener(rulesGui, villagerService, messages),
-            new PvpListener(pvpGui, pvpService)
+            new PvpListener(pvpGui, pvpService),
+            new GodMenuListener(
+                plugin,
+                godMenuGui,
+                ownerControl,
+                ownerRecoveryExportService,
+                endAccessService,
+                eventManager,
+                godItems,
+                messages,
+                settings.borderDefaults().size(),
+                settings.borderDefaults().centerX(),
+                settings.borderDefaults().centerZ(),
+                settings.borderDefaults().warningDistance(),
+                settings.borderDefaults().warningTime()
+            )
         );
 
         context.lifecycle().mark(LifecyclePhase.REGISTER_COMMANDS);
@@ -103,6 +125,7 @@ public final class DiamondPaperModule {
             trustService,
             partyService,
             pvpService,
+            ownerControl,
             rulesGui,
             eventManager
         );
@@ -112,6 +135,8 @@ public final class DiamondPaperModule {
             villagerService,
             eventManager,
             endAccessService,
+            ownerControl,
+            godMenuGui,
             settings.borderDefaults().size(),
             settings.borderDefaults().centerX(),
             settings.borderDefaults().centerZ(),
@@ -135,6 +160,7 @@ public final class DiamondPaperModule {
         registerCommand("dsborder", adminCommands, adminCommands);
         registerCommand("godtest", adminCommands, adminCommands);
         registerCommand("end", adminCommands, adminCommands);
+        registerCommand("god", adminCommands, adminCommands);
 
         registerRecipes();
         configureBorders(settings);

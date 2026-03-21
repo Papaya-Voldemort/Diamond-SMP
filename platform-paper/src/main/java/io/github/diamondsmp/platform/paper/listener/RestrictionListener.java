@@ -37,6 +37,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.SmithingInventory;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
 public final class RestrictionListener implements Listener {
     private static final Set<Material> NETHERITE_ITEMS = EnumSet.of(
@@ -128,8 +129,7 @@ public final class RestrictionListener implements Listener {
             if (item == null || !(item.getItemMeta() instanceof PotionMeta meta)) {
                 continue;
             }
-            if (meta.hasCustomEffects() && meta.getCustomEffects().stream()
-                .anyMatch(effect -> effect.getType().equals(PotionEffectType.STRENGTH) && effect.getAmplifier() >= 1)) {
+            if (isRestrictedStrengthPotion(meta)) {
                 event.setCancelled(true);
                 return;
             }
@@ -230,12 +230,9 @@ public final class RestrictionListener implements Listener {
         if (!(item.getItemMeta() instanceof PotionMeta meta)) {
             return;
         }
-        if (settings.worldRules().disableStrengthTwo() && meta.hasCustomEffects()) {
-            boolean restricted = meta.getCustomEffects().stream()
-                .anyMatch(effect -> effect.getType().equals(PotionEffectType.STRENGTH) && effect.getAmplifier() >= 1);
-            if (restricted && !godItems.isGodItem(item, GodItemType.INFINITE_TOTEM)) {
-                event.setCancelled(true);
-            }
+        if (settings.worldRules().disableStrengthTwo() && isRestrictedStrengthPotion(meta)
+            && !godItems.isGodItem(item, GodItemType.INFINITE_TOTEM)) {
+            event.setCancelled(true);
         }
     }
 
@@ -399,6 +396,14 @@ public final class RestrictionListener implements Listener {
         return settings.worldRules().disableRestrictedEnchants()
             && stack.getEnchantments().entrySet().stream().anyMatch(entry -> isRestricted(entry.getKey(), entry.getValue()))
             && !godItems.isAnyGodItem(stack);
+    }
+
+    private boolean isRestrictedStrengthPotion(PotionMeta meta) {
+        if (meta.getBasePotionType() == PotionType.STRONG_STRENGTH) {
+            return true;
+        }
+        return meta.hasCustomEffects() && meta.getCustomEffects().stream()
+            .anyMatch(effect -> effect.getType().equals(PotionEffectType.STRENGTH) && effect.getAmplifier() >= 1);
     }
 
     private boolean isRestricted(Enchantment enchantment, int level) {

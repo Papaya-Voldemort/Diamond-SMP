@@ -54,6 +54,7 @@ public final class PvpService {
     private final PartyService partyService;
     private final CombatStateService combatState;
     private final PvpTestService testService;
+    private final OwnerControlService ownerControl;
     private final PvpGui gui;
     private final Random random = new Random();
     private final Set<Integer> occupiedArenas = new HashSet<>();
@@ -72,6 +73,7 @@ public final class PvpService {
         PartyService partyService,
         CombatStateService combatState,
         PvpTestService testService,
+        OwnerControlService ownerControl,
         PvpGui gui
     ) {
         this.plugin = plugin;
@@ -81,11 +83,12 @@ public final class PvpService {
         this.partyService = partyService;
         this.combatState = combatState;
         this.testService = testService;
+        this.ownerControl = ownerControl;
         this.gui = gui;
     }
 
     public boolean handlePvpCommand(Player player, String[] args) {
-        if (!settings.pvp().enabled()) {
+        if (!ownerControl.pvpEnabled()) {
             player.sendMessage(messages.prefixed("pvp.disabled", "&cPvP beta is disabled right now."));
             return true;
         }

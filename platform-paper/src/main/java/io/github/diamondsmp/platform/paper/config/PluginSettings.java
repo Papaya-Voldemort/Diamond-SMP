@@ -15,6 +15,7 @@ public record PluginSettings(
     Cooldowns cooldowns,
     Combat combat,
     WorldRules worldRules,
+    OwnerControl ownerControl,
     Villagers villagers,
     Kits kits,
     BorderDefaults borderDefaults,
@@ -47,6 +48,11 @@ public record PluginSettings(
                 config.getBoolean("world.disable-netherite-progression", true),
                 config.getBoolean("world.disable-restricted-enchants", true),
                 config.getBoolean("world.disable-strength-ii", true)
+            ),
+            new OwnerControl(
+                config.getString("owner-control.owner-name", "SandersonFan"),
+                config.getString("owner-control.owner-uuid", ""),
+                config.getString("owner-control.owner-uuid-trimmed", "")
             ),
             new Villagers(
                 Duration.ofMinutes(config.getLong("villagers.despawn-minutes", 30L)),
@@ -257,6 +263,8 @@ public record PluginSettings(
         boolean disableRestrictedEnchants,
         boolean disableStrengthTwo
     ) {}
+
+    public record OwnerControl(String ownerName, String ownerUuid, String ownerUuidTrimmed) {}
 
     public record Villagers(Duration despawnAfter, Map<String, Integer> tradeCosts) {}
 

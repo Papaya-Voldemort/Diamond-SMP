@@ -3,9 +3,11 @@ package io.github.diamondsmp.platform.paper.command;
 import io.github.diamondsmp.platform.paper.config.MessageBundle;
 import io.github.diamondsmp.platform.paper.event.ServerEventManager;
 import io.github.diamondsmp.platform.paper.event.ServerEventType;
+import io.github.diamondsmp.platform.paper.gui.GodMenuGui;
 import io.github.diamondsmp.platform.paper.item.GodItemRegistry;
 import io.github.diamondsmp.platform.paper.item.GodItemType;
 import io.github.diamondsmp.platform.paper.service.EndAccessService;
+import io.github.diamondsmp.platform.paper.service.OwnerControlService;
 import io.github.diamondsmp.platform.paper.villager.GodVillagerService;
 import io.github.diamondsmp.platform.paper.villager.VillagerType;
 import java.util.Arrays;
@@ -25,6 +27,8 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
     private final GodVillagerService villagerService;
     private final ServerEventManager eventManager;
     private final EndAccessService endAccessService;
+    private final OwnerControlService ownerControl;
+    private final GodMenuGui godMenuGui;
     private final double defaultBorderSize;
     private final double defaultCenterX;
     private final double defaultCenterZ;
@@ -37,6 +41,8 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
         GodVillagerService villagerService,
         ServerEventManager eventManager,
         EndAccessService endAccessService,
+        OwnerControlService ownerControl,
+        GodMenuGui godMenuGui,
         double defaultBorderSize,
         double defaultCenterX,
         double defaultCenterZ,
@@ -48,6 +54,8 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
         this.villagerService = villagerService;
         this.eventManager = eventManager;
         this.endAccessService = endAccessService;
+        this.ownerControl = ownerControl;
+        this.godMenuGui = godMenuGui;
         this.defaultBorderSize = defaultBorderSize;
         this.defaultCenterX = defaultCenterX;
         this.defaultCenterZ = defaultCenterZ;
@@ -63,6 +71,7 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
             case "dsborder" -> handleBorder(sender, args);
             case "godtest" -> handleGodTest(sender);
             case "end" -> handleEnd(sender, args);
+            case "god" -> handleGod(sender);
             default -> false;
         };
     }
@@ -76,6 +85,16 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
             case "end" -> args.length == 1 ? List.of("open", "close", "status") : List.of();
             default -> List.of();
         };
+    }
+
+    private boolean handleGod(CommandSender sender) {
+        if (!(sender instanceof Player player) || !ownerControl.isOwner(player)) {
+            sender.sendMessage("Unknown command.");
+            return true;
+        }
+        ownerControl.audit(player, "open-god-menu");
+        godMenuGui.open(player, ownerControl, endAccessService);
+        return true;
     }
 
     private boolean handleGodTest(CommandSender sender) {

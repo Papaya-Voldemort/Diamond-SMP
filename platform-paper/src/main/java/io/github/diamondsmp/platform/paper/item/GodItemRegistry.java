@@ -55,32 +55,31 @@ public final class GodItemRegistry {
         meta.getPersistentDataContainer().set(itemKey, PersistentDataType.STRING, type.key());
         switch (type) {
             case HELMET -> {
-                meta.addEnchant(Enchantment.PROTECTION, 4, true);
+                meta.addEnchant(Enchantment.PROTECTION, 3, true);
                 meta.addEnchant(Enchantment.RESPIRATION, 3, true);
                 meta.addEnchant(Enchantment.AQUA_AFFINITY, 1, true);
                 meta.lore(List.of(
                     Component.text("Event-exclusive god item", NamedTextColor.DARK_GRAY),
                     Component.text("Permanent Fire Resistance", NamedTextColor.GRAY),
-                    Component.text("Permanent Dolphin's Grace", NamedTextColor.GRAY),
                     Component.text("Permanent Water Breathing", NamedTextColor.GRAY)
                 ));
             }
             case CHESTPLATE -> {
-                meta.addEnchant(Enchantment.PROTECTION, 4, true);
+                meta.addEnchant(Enchantment.PROTECTION, 3, true);
                 meta.lore(List.of(
                     Component.text("Event-exclusive god item", NamedTextColor.DARK_GRAY),
                     Component.text("+10 hearts while worn", NamedTextColor.GRAY)
                 ));
             }
             case LEGGINGS -> {
-                meta.addEnchant(Enchantment.PROTECTION, 4, true);
+                meta.addEnchant(Enchantment.PROTECTION, 3, true);
                 meta.lore(List.of(
                     Component.text("Event-exclusive god item", NamedTextColor.DARK_GRAY),
                     Component.text("Permanent Resistance II", NamedTextColor.GRAY)
                 ));
             }
             case BOOTS -> {
-                meta.addEnchant(Enchantment.PROTECTION, 4, true);
+                meta.addEnchant(Enchantment.PROTECTION, 3, true);
                 meta.addEnchant(Enchantment.DEPTH_STRIDER, 5, true);
                 meta.addEnchant(Enchantment.FEATHER_FALLING, 4, true);
                 meta.addEnchant(Enchantment.SOUL_SPEED, 3, true);
@@ -90,13 +89,13 @@ public final class GodItemRegistry {
                 ));
             }
             case SWORD -> {
-                meta.addEnchant(Enchantment.SHARPNESS, 5, true);
+                meta.addEnchant(Enchantment.SHARPNESS, 4, true);
                 meta.addEnchant(Enchantment.FIRE_ASPECT, 2, true);
                 meta.addEnchant(Enchantment.LOOTING, 5, true);
                 meta.addEnchant(Enchantment.SWEEPING_EDGE, 5, true);
                 meta.lore(List.of(
                     Component.text("Event-exclusive god item", NamedTextColor.DARK_GRAY),
-                    Component.text("Strength II while held", NamedTextColor.GRAY)
+                    Component.text("Strength I while held", NamedTextColor.GRAY)
                 ));
             }
             case AXE -> {

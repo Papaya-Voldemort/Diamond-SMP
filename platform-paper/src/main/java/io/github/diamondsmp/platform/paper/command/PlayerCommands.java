@@ -8,6 +8,7 @@ import io.github.diamondsmp.platform.paper.gui.RulesGui;
 import io.github.diamondsmp.platform.paper.service.CombatStateService;
 import io.github.diamondsmp.platform.paper.service.CooldownService;
 import io.github.diamondsmp.platform.paper.service.KitService;
+import io.github.diamondsmp.platform.paper.service.OwnerControlService;
 import io.github.diamondsmp.platform.paper.service.PartyService;
 import io.github.diamondsmp.platform.paper.service.PvpService;
 import io.github.diamondsmp.platform.paper.service.TeleportRequestService;
@@ -43,6 +44,7 @@ public final class PlayerCommands implements CommandExecutor, TabCompleter {
     private final TrustService trustService;
     private final PartyService partyService;
     private final PvpService pvpService;
+    private final OwnerControlService ownerControl;
     private final RulesGui rulesGui;
     private final ServerEventManager eventManager;
 
@@ -57,6 +59,7 @@ public final class PlayerCommands implements CommandExecutor, TabCompleter {
         TrustService trustService,
         PartyService partyService,
         PvpService pvpService,
+        OwnerControlService ownerControl,
         RulesGui rulesGui,
         ServerEventManager eventManager
     ) {
@@ -70,6 +73,7 @@ public final class PlayerCommands implements CommandExecutor, TabCompleter {
         this.trustService = trustService;
         this.partyService = partyService;
         this.pvpService = pvpService;
+        this.ownerControl = ownerControl;
         this.rulesGui = rulesGui;
         this.eventManager = eventManager;
     }
@@ -99,7 +103,10 @@ public final class PlayerCommands implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if ((command.getName().equalsIgnoreCase("p") || command.getName().equalsIgnoreCase("pvp")) && !settings.pvp().enabled()) {
+        if (command.getName().equalsIgnoreCase("p") && !ownerControl.partyEnabled()) {
+            return List.of();
+        }
+        if (command.getName().equalsIgnoreCase("pvp") && !ownerControl.pvpEnabled()) {
             return List.of();
         }
         if ((command.getName().equalsIgnoreCase("tpa")
@@ -420,7 +427,7 @@ public final class PlayerCommands implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleParty(Player player, String[] args) {
-        if (!settings.pvp().enabled()) {
+        if (!ownerControl.partyEnabled()) {
             player.sendMessage(messages.prefixed("party.disabled", "&cParty PvP beta is disabled right now."));
             return true;
         }

@@ -77,6 +77,9 @@ commands:
     description: Open or close access to the End.
     usage: /end <open|close|status>
     permission: diamondsmp.admin.end
+  god:
+    description: Owner control panel.
+    usage: /god
 permissions:
   diamondsmp.command.string:
     default: true

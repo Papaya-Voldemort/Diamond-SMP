@@ -373,12 +373,11 @@ public final class GameplayListener implements Listener {
     private void refreshEffects(Player player) {
         PlayerInventory inventory = player.getInventory();
         applyArmorEffect(player, inventory.getHelmet(), GodItemType.HELMET, PotionEffectType.FIRE_RESISTANCE, 0);
-        applyArmorEffect(player, inventory.getHelmet(), GodItemType.HELMET, PotionEffectType.DOLPHINS_GRACE, 0);
         applyArmorEffect(player, inventory.getHelmet(), GodItemType.HELMET, PotionEffectType.WATER_BREATHING, 0);
         applyArmorEffect(player, inventory.getChestplate(), GodItemType.CHESTPLATE, PotionEffectType.HEALTH_BOOST, 4);
         applyArmorEffect(player, inventory.getLeggings(), GodItemType.LEGGINGS, PotionEffectType.RESISTANCE, 1);
         applyArmorEffect(player, inventory.getBoots(), GodItemType.BOOTS, PotionEffectType.SPEED, 1);
-        applyHeldEffect(player, inventory.getItemInMainHand(), GodItemType.SWORD, PotionEffectType.STRENGTH, 1);
+        applyHeldEffect(player, inventory.getItemInMainHand(), GodItemType.SWORD, PotionEffectType.STRENGTH, 0);
     }
 
     private void updateCombatStatus(Player player) {

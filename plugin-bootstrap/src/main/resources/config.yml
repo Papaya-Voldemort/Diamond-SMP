@@ -23,6 +23,11 @@ world:
   disable-restricted-enchants: true
   disable-strength-ii: true
 
+owner-control:
+  owner-name: "SandersonFan"
+  owner-uuid: "8a20d85a-4767-454c-b3cf-61a26409c894"
+  owner-uuid-trimmed: "8a20d85a4767454cb3cf61a26409c894"
+
 villagers:
   despawn-minutes: 30
   costs:
