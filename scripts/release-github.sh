@@ -25,10 +25,16 @@ if [ -z "$VERSION" ]; then
 fi
 
 TAG="v$VERSION"
+JAR_PATH="plugin-bootstrap/build/libs/Diamond-SMP-$VERSION.jar"
 echo "Preparing release for version $VERSION ($TAG)"
 
 "$GH_BIN" auth status >/dev/null
 ./gradlew build
+
+if [ ! -f "$JAR_PATH" ]; then
+  echo "Expected release jar not found: $JAR_PATH" >&2
+  exit 1
+fi
 
 if ! git diff --quiet || ! git diff --cached --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
   echo "Committing local changes for $TAG"
@@ -55,5 +61,8 @@ git push origin main --follow-tags
   --repo Papaya-Voldemort/Diamond-SMP \
   --title "$TAG" \
   --generate-notes
+"$GH_BIN" release upload "$TAG" "$JAR_PATH" \
+  --repo Papaya-Voldemort/Diamond-SMP \
+  --clobber
 
 echo "Released $TAG"
