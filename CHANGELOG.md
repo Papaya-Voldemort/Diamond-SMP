@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5 - 2026-03-22
+
+- Fixed restricted enchant handling so normal `Protection IV` and `Sharpness V` items downgrade to the allowed cap instead of being blocked outright
+- Sanitized stored enchants on books, villager trade outputs, inventory items, loot results, and anvil outputs while preserving plugin god items
+- Cleaned up restriction listener hot paths and removed redundant chunk processing overhead in the same subsystem
+
 ## 1.0.2 - 2026-03-20
 
 - Added real web downloads for the branded companion dependencies: PlaceholderAPI `2.12.2`, TAB `5.5.0`, and Custom Join Messages `17.9.1`

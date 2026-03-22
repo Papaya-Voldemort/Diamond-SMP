@@ -4,37 +4,44 @@ import io.github.diamondsmp.platform.paper.config.PluginSettings;
 import io.github.diamondsmp.platform.paper.item.GodItemRegistry;
 import io.github.diamondsmp.platform.paper.item.GodItemType;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.entity.VillagerAcquireTradeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MerchantInventory;
+import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.SmithingInventory;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
@@ -50,6 +57,10 @@ public final class RestrictionListener implements Listener {
         Material.NETHERITE_PICKAXE,
         Material.NETHERITE_INGOT,
         Material.NETHERITE_BLOCK
+    );
+    private static final Map<Enchantment, Integer> RESTRICTED_ENCHANT_CAPS = Map.of(
+        Enchantment.PROTECTION, 3,
+        Enchantment.SHARPNESS, 4
     );
 
     private final PluginSettings settings;
@@ -79,9 +90,11 @@ public final class RestrictionListener implements Listener {
             inventory.setResult(result);
             return;
         }
-        if (isRestrictedNetherite(result) || hasRestrictedEnchant(result)) {
+        if (isRestrictedNetherite(result)) {
             inventory.setResult(null);
+            return;
         }
+        inventory.setResult(sanitizeRestrictedEnchants(result));
     }
 
     @EventHandler
@@ -90,9 +103,11 @@ public final class RestrictionListener implements Listener {
         if (current == null) {
             return;
         }
-        if (isRestrictedNetherite(current) || hasRestrictedEnchant(current)) {
+        if (isRestrictedNetherite(current)) {
             event.setCancelled(true);
+            return;
         }
+        event.setCurrentItem(sanitizeRestrictedEnchants(current));
     }
 
     @EventHandler
@@ -107,15 +122,23 @@ public final class RestrictionListener implements Listener {
     @EventHandler
     public void onPrepareAnvil(PrepareAnvilEvent event) {
         ItemStack result = event.getResult();
-        if (result != null && (isRestrictedNetherite(result) || hasRestrictedEnchant(result))) {
-            event.setResult(null);
+        if (result == null) {
+            return;
         }
+        if (isRestrictedNetherite(result)) {
+            event.setResult(null);
+            return;
+        }
+        event.setResult(sanitizeRestrictedEnchants(result));
     }
 
     @EventHandler
     public void onEnchant(EnchantItemEvent event) {
-        if (event.getEnchantsToAdd().entrySet().stream().anyMatch(entry -> isRestricted(entry.getKey(), entry.getValue()))) {
-            event.setCancelled(true);
+        if (!settings.worldRules().disableRestrictedEnchants()) {
+            return;
+        }
+        for (Map.Entry<Enchantment, Integer> entry : event.getEnchantsToAdd().entrySet()) {
+            entry.setValue(capLevel(entry.getKey(), entry.getValue()));
         }
     }
 
@@ -138,12 +161,20 @@ public final class RestrictionListener implements Listener {
 
     @EventHandler
     public void onLootGenerate(LootGenerateEvent event) {
-        Iterator<ItemStack> iterator = event.getLoot().iterator();
-        while (iterator.hasNext()) {
-            ItemStack item = iterator.next();
-            if (item.getType() == Material.ANCIENT_DEBRIS || isRestrictedNetherite(item) || hasRestrictedEnchant(item)) {
-                iterator.remove();
+        List<ItemStack> loot = event.getLoot();
+        for (int index = 0; index < loot.size(); ) {
+            ItemStack item = loot.get(index);
+            if (item.getType() == Material.ANCIENT_DEBRIS) {
+                loot.remove(index);
+                continue;
             }
+            ItemStack sanitized = sanitizeRestrictedEnchants(item);
+            if (isRestrictedNetherite(sanitized) || hasRestrictedEnchant(sanitized)) {
+                loot.remove(index);
+                continue;
+            }
+            loot.set(index, sanitized);
+            index++;
         }
     }
 
@@ -162,9 +193,6 @@ public final class RestrictionListener implements Listener {
     }
 
     private void stripAncientDebris(ChunkLoadEvent event) {
-        for (BlockState state : event.getChunk().getTileEntities()) {
-            // nothing to do for tile entities
-        }
         int minY = event.getWorld().getMinHeight();
         int maxY = event.getWorld().getMaxHeight();
         for (int x = 0; x < 16; x++) {
@@ -237,25 +265,74 @@ public final class RestrictionListener implements Listener {
     }
 
     @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        sanitizeInventory(event.getPlayer().getInventory());
+        sanitizeInventory(event.getPlayer().getEnderChest());
+    }
+
+    @EventHandler
     public void onRestrictedInventoryClick(InventoryClickEvent event) {
         ItemStack current = event.getCurrentItem();
         if (current == null) {
             return;
         }
-        InventoryView view = event.getView();
-        if (view.getTopInventory() instanceof AnvilInventory || view.getTopInventory() instanceof SmithingInventory) {
-            if (event.getRawSlot() == 2 && (isRestrictedNetherite(current) || hasRestrictedEnchant(current))) {
-                event.setCancelled(true);
+        ItemStack sanitizedCurrent = sanitizeRestrictedEnchants(current);
+        if (!sanitizedCurrent.equals(current)) {
+            event.setCurrentItem(sanitizedCurrent);
+            current = sanitizedCurrent;
+        }
+        ItemStack cursor = event.getCursor();
+        if (cursor != null && cursor.getType() != Material.AIR) {
+            ItemStack sanitizedCursor = sanitizeRestrictedEnchants(cursor);
+            if (!sanitizedCursor.equals(cursor)) {
+                event.getView().setCursor(sanitizedCursor);
             }
         }
+        InventoryView view = event.getView();
+        if (!(view.getTopInventory() instanceof AnvilInventory || view.getTopInventory() instanceof SmithingInventory)) {
+            return;
+        }
+        if (event.getRawSlot() != 2) {
+            return;
+        }
+        if (isRestrictedNetherite(current)) {
+            event.setCancelled(true);
+            return;
+        }
+        ItemStack sanitized = sanitizeRestrictedEnchants(current);
+        if (hasRestrictedEnchant(sanitized)) {
+            event.setCancelled(true);
+            return;
+        }
+        event.setCurrentItem(sanitized);
     }
 
     @EventHandler
     public void onVillagerAcquireTrade(VillagerAcquireTradeEvent event) {
         ItemStack result = event.getRecipe().getResult();
-        if (isRestrictedNetherite(result) || hasRestrictedEnchant(result)) {
+        if (isRestrictedNetherite(result)) {
             event.setCancelled(true);
+            return;
         }
+        ItemStack sanitized = sanitizeRestrictedEnchants(result);
+        if (hasRestrictedEnchant(sanitized)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (!sanitized.equals(result)) {
+            event.setRecipe(copyRecipeWithResult(event.getRecipe(), sanitized));
+        }
+    }
+
+    @EventHandler
+    public void onMerchantOpen(InventoryOpenEvent event) {
+        if (!(event.getInventory() instanceof MerchantInventory inventory)) {
+            return;
+        }
+        if (!(inventory.getMerchant() instanceof Villager villager)) {
+            return;
+        }
+        sanitizeMerchantRecipes(villager);
     }
 
     private boolean isRestrictedNetherite(ItemStack stack) {
@@ -265,7 +342,7 @@ public final class RestrictionListener implements Listener {
     }
 
     private List<Block> collectVein(Block start, Set<Long> processed, int minBlockX, int maxBlockX, int minBlockZ, int maxBlockZ) {
-        List<Block> vein = new java.util.ArrayList<>();
+        List<Block> vein = new ArrayList<>();
         ArrayDeque<Block> queue = new ArrayDeque<>();
         queue.add(start);
         Material target = start.getType();
@@ -274,9 +351,7 @@ public final class RestrictionListener implements Listener {
             if (!isDiamondOre(block.getType()) || block.getType() != target) {
                 continue;
             }
-            if (!vein.contains(block)) {
-                vein.add(block);
-            }
+            vein.add(block);
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dy = -1; dy <= 1; dy++) {
                     for (int dz = -1; dz <= 1; dz++) {
@@ -393,9 +468,130 @@ public final class RestrictionListener implements Listener {
     }
 
     private boolean hasRestrictedEnchant(ItemStack stack) {
-        return settings.worldRules().disableRestrictedEnchants()
-            && stack.getEnchantments().entrySet().stream().anyMatch(entry -> isRestricted(entry.getKey(), entry.getValue()))
-            && !godItems.isAnyGodItem(stack);
+        if (!settings.worldRules().disableRestrictedEnchants() || godItems.isAnyGodItem(stack)) {
+            return false;
+        }
+        for (Map.Entry<Enchantment, Integer> entry : stack.getEnchantments().entrySet()) {
+            if (isRestricted(entry.getKey(), entry.getValue())) {
+                return true;
+            }
+        }
+        if (!(stack.getItemMeta() instanceof EnchantmentStorageMeta meta)) {
+            return false;
+        }
+        for (Map.Entry<Enchantment, Integer> entry : meta.getStoredEnchants().entrySet()) {
+            if (isRestricted(entry.getKey(), entry.getValue())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ItemStack sanitizeRestrictedEnchants(ItemStack stack) {
+        if (!settings.worldRules().disableRestrictedEnchants() || godItems.isAnyGodItem(stack)) {
+            return stack;
+        }
+        ItemStack sanitized = stack;
+        for (Map.Entry<Enchantment, Integer> entry : new HashMap<>(stack.getEnchantments()).entrySet()) {
+            int cappedLevel = capLevel(entry.getKey(), entry.getValue());
+            if (cappedLevel == entry.getValue()) {
+                continue;
+            }
+            if (sanitized == stack) {
+                sanitized = stack.clone();
+            }
+            sanitized.removeEnchantment(entry.getKey());
+            sanitized.addUnsafeEnchantment(entry.getKey(), cappedLevel);
+        }
+        ItemMeta meta = sanitized.getItemMeta();
+        if (!(meta instanceof EnchantmentStorageMeta storageMeta)) {
+            return sanitized;
+        }
+        boolean updatedMeta = false;
+        for (Map.Entry<Enchantment, Integer> entry : new HashMap<>(storageMeta.getStoredEnchants()).entrySet()) {
+            int cappedLevel = capLevel(entry.getKey(), entry.getValue());
+            if (cappedLevel == entry.getValue()) {
+                continue;
+            }
+            storageMeta.removeStoredEnchant(entry.getKey());
+            storageMeta.addStoredEnchant(entry.getKey(), cappedLevel, true);
+            updatedMeta = true;
+        }
+        if (updatedMeta) {
+            if (sanitized == stack) {
+                sanitized = stack.clone();
+            }
+            sanitized.setItemMeta(storageMeta);
+        }
+        return sanitized;
+    }
+
+    private MerchantRecipe copyRecipeWithResult(MerchantRecipe recipe, ItemStack result) {
+        MerchantRecipe copy = new MerchantRecipe(
+            result,
+            recipe.getUses(),
+            recipe.getMaxUses(),
+            recipe.hasExperienceReward(),
+            recipe.getVillagerExperience(),
+            recipe.getPriceMultiplier()
+        );
+        copy.setDemand(recipe.getDemand());
+        copy.setSpecialPrice(recipe.getSpecialPrice());
+        copy.setIngredients(recipe.getIngredients());
+        return copy;
+    }
+
+    private void sanitizeInventory(Inventory inventory) {
+        ItemStack[] contents = inventory.getContents();
+        boolean changed = false;
+        for (int slot = 0; slot < contents.length; slot++) {
+            ItemStack item = contents[slot];
+            if (item == null) {
+                continue;
+            }
+            ItemStack sanitized = sanitizeRestrictedEnchants(item);
+            if (!sanitized.equals(item)) {
+                contents[slot] = sanitized;
+                changed = true;
+            }
+        }
+        if (changed) {
+            inventory.setContents(contents);
+        }
+    }
+
+    private void sanitizeMerchantRecipes(Villager villager) {
+        List<MerchantRecipe> recipes = villager.getRecipes();
+        List<MerchantRecipe> sanitizedRecipes = new ArrayList<>(recipes.size());
+        boolean changed = false;
+        for (MerchantRecipe recipe : recipes) {
+            ItemStack result = recipe.getResult();
+            if (isRestrictedNetherite(result)) {
+                changed = true;
+                continue;
+            }
+            ItemStack sanitized = sanitizeRestrictedEnchants(result);
+            if (hasRestrictedEnchant(sanitized)) {
+                changed = true;
+                continue;
+            }
+            if (!sanitized.equals(result)) {
+                changed = true;
+                recipe = copyRecipeWithResult(recipe, sanitized);
+            }
+            sanitizedRecipes.add(recipe);
+        }
+        if (changed) {
+            villager.setRecipes(sanitizedRecipes);
+        }
+    }
+
+    private int capLevel(Enchantment enchantment, int level) {
+        Integer cap = RESTRICTED_ENCHANT_CAPS.get(enchantment);
+        if (cap == null) {
+            return level;
+        }
+        return Math.min(level, cap);
     }
 
     private boolean isRestrictedStrengthPotion(PotionMeta meta) {
@@ -407,7 +603,7 @@ public final class RestrictionListener implements Listener {
     }
 
     private boolean isRestricted(Enchantment enchantment, int level) {
-        return (enchantment == Enchantment.PROTECTION && level >= 4)
-            || (enchantment == Enchantment.SHARPNESS && level >= 5);
+        Integer cap = RESTRICTED_ENCHANT_CAPS.get(enchantment);
+        return cap != null && level > cap;
     }
 }

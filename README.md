@@ -117,19 +117,19 @@ Operator documentation:
 
 Current release:
 
-- `1.0.2`
+- `1.0.5`
 - Paper `1.21.11`
 - Java `21`
-- Deployable jar: `plugin-bootstrap/build/libs/Diamond-SMP-1.0.2.jar`
+- Deployable jar: `plugin-bootstrap/build/libs/Diamond-SMP-1.0.5.jar`
 
 ## Deploy
 
-1. Copy `plugin-bootstrap/build/libs/Diamond-SMP-1.0.2.jar` into `plugins/`.
+1. Copy `plugin-bootstrap/build/libs/Diamond-SMP-1.0.5.jar` into `plugins/`.
 2. Start the server once to generate config and state files.
 3. Edit the generated YAML files inside `plugins/DiamondSMP/`.
 4. Restart the server.
 
-GitHub release notes for `1.0.2` live in `docs/releases/1.0.2.md`.
+GitHub release notes for `1.0.5` live in `docs/releases/1.0.5.md`.
 
 ## Validation Checklist
 
