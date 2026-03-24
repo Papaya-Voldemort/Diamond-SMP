@@ -5,6 +5,7 @@ import io.github.diamondsmp.core.api.PluginContext;
 import io.github.diamondsmp.platform.paper.advancement.MythicalAdvancementService;
 import io.github.diamondsmp.platform.paper.command.AdminCommands;
 import io.github.diamondsmp.platform.paper.command.PlayerCommands;
+import io.github.diamondsmp.platform.paper.config.CraftingSettings;
 import io.github.diamondsmp.platform.paper.config.MessageBundle;
 import io.github.diamondsmp.platform.paper.config.PluginSettings;
 import io.github.diamondsmp.platform.paper.config.RulesBook;
@@ -12,6 +13,7 @@ import io.github.diamondsmp.platform.paper.event.ServerEventManager;
 import io.github.diamondsmp.platform.paper.gui.PvpGui;
 import io.github.diamondsmp.platform.paper.gui.RulesGui;
 import io.github.diamondsmp.platform.paper.gui.GodMenuGui;
+import io.github.diamondsmp.platform.paper.item.DiamondPerkRegistry;
 import io.github.diamondsmp.platform.paper.item.GodItemRegistry;
 import io.github.diamondsmp.platform.paper.listener.GameplayListener;
 import io.github.diamondsmp.platform.paper.listener.BrandingListener;
@@ -35,6 +37,7 @@ import io.github.diamondsmp.platform.paper.service.PvpService;
 import io.github.diamondsmp.platform.paper.service.PvpTestService;
 import io.github.diamondsmp.platform.paper.service.TeleportRequestService;
 import io.github.diamondsmp.platform.paper.service.TrustService;
+import io.github.diamondsmp.platform.paper.villager.DiamondMasterTradeService;
 import io.github.diamondsmp.platform.paper.villager.GodVillagerService;
 import java.io.File;
 import java.util.List;
@@ -68,10 +71,13 @@ public final class DiamondPaperModule {
         MessageBundle messages = MessageBundle.load(load("messages.yml"));
         RulesBook rulesBook = RulesBook.load(load("rules.yml"));
         YamlConfiguration villagersConfig = load("villagers.yml");
+        YamlConfiguration craftingConfig = load("crafting.yml");
         YamlConfiguration kitsConfig = load("kits.yml");
+        CraftingSettings craftingSettings = CraftingSettings.load(craftingConfig);
         brandingService.applyStartupBranding();
 
         GodItemRegistry godItems = new GodItemRegistry(plugin);
+        DiamondPerkRegistry perkRegistry = new DiamondPerkRegistry(plugin);
         CooldownService cooldowns = new CooldownService();
         TeleportRequestService teleportRequests = new TeleportRequestService();
         TrustService trustService = new TrustService();
@@ -88,6 +94,7 @@ public final class DiamondPaperModule {
         PvpService pvpService = new PvpService(plugin, settings, messages, kitService, partyService, combatState, pvpTestService, ownerControl, pvpGui);
         PurchaseHistoryStore purchaseHistory = new PurchaseHistoryStore(plugin);
         GodVillagerService villagerService = new GodVillagerService(plugin, settings, godItems, purchaseHistory, villagersConfig);
+        DiamondMasterTradeService diamondMasterTrades = new DiamondMasterTradeService(plugin, settings, perkRegistry, villagerService, villagersConfig);
         ServerEventManager eventManager = new ServerEventManager(plugin, messages, villagerService, pvpService::isInPvpSession);
         MythicalAdvancementService mythicalAdvancements = new MythicalAdvancementService(plugin, messages);
         RulesGui rulesGui = new RulesGui(rulesBook);
@@ -96,9 +103,9 @@ public final class DiamondPaperModule {
         context.lifecycle().mark(LifecyclePhase.REGISTER_LISTENERS);
         registerListeners(
             new BrandingListener(brandingService),
-            new GameplayListener(plugin, settings, messages, godItems, cooldowns, combatState, trustService, dragonEggService, endAccessService, eventManager, mythicalAdvancements, pvpService),
-            new RestrictionListener(settings, godItems),
-            new GuiAndVillagerListener(rulesGui, villagerService, messages),
+            new GameplayListener(plugin, settings, messages, godItems, perkRegistry, cooldowns, combatState, trustService, dragonEggService, endAccessService, eventManager, mythicalAdvancements, pvpService),
+            new RestrictionListener(plugin, settings, craftingSettings, godItems, perkRegistry, villagerService, diamondMasterTrades),
+            new GuiAndVillagerListener(rulesGui, villagerService, diamondMasterTrades, messages),
             new PvpListener(pvpGui, pvpService),
             new DragonEggListener(dragonEggService, messages),
             new GodMenuListener(
@@ -168,7 +175,7 @@ public final class DiamondPaperModule {
         registerCommand("dragonegg", adminCommands, adminCommands);
         registerCommand("god", adminCommands, adminCommands);
 
-        registerRecipes();
+        registerRecipes(craftingSettings);
         configureBorders(settings);
         registerPlaceholderExpansion(eventManager);
     }
@@ -202,18 +209,22 @@ public final class DiamondPaperModule {
         return YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), fileName));
     }
 
-    private void registerRecipes() {
-        ShapelessRecipe cobwebRecipe = new ShapelessRecipe(new NamespacedKey(plugin, "easy_cobweb"), new ItemStack(Material.COBWEB, 5));
-        for (int i = 0; i < 5; i++) {
-            cobwebRecipe.addIngredient(Material.STRING);
+    private void registerRecipes(CraftingSettings craftingSettings) {
+        if (craftingSettings.easyCobs()) {
+            ShapelessRecipe cobwebRecipe = new ShapelessRecipe(new NamespacedKey(plugin, "easy_cobweb"), new ItemStack(Material.COBWEB, 5));
+            for (int i = 0; i < 5; i++) {
+                cobwebRecipe.addIngredient(Material.STRING);
+            }
+            Bukkit.addRecipe(cobwebRecipe);
         }
-        Bukkit.addRecipe(cobwebRecipe);
 
-        ShapedRecipe goldenAppleRecipe = new ShapedRecipe(new NamespacedKey(plugin, "easy_gaps"), new ItemStack(Material.GOLDEN_APPLE, 8));
-        goldenAppleRecipe.shape("GGG", "GAG", "GGG");
-        goldenAppleRecipe.setIngredient('G', Material.GOLD_INGOT);
-        goldenAppleRecipe.setIngredient('A', Material.APPLE);
-        Bukkit.addRecipe(goldenAppleRecipe);
+        if (craftingSettings.easyGaps()) {
+            ShapedRecipe goldenAppleRecipe = new ShapedRecipe(new NamespacedKey(plugin, "easy_gaps"), new ItemStack(Material.GOLDEN_APPLE, 8));
+            goldenAppleRecipe.shape("GGG", "GAG", "GGG");
+            goldenAppleRecipe.setIngredient('G', Material.GOLD_INGOT);
+            goldenAppleRecipe.setIngredient('A', Material.APPLE);
+            Bukkit.addRecipe(goldenAppleRecipe);
+        }
     }
 
     private void registerPlaceholderExpansion(ServerEventManager eventManager) {
@@ -225,7 +236,7 @@ public final class DiamondPaperModule {
 
     private void saveDefaults() {
         plugin.saveDefaultConfig();
-        for (String file : List.of("messages.yml", "rules.yml", "villagers.yml", "events.yml", "kits.yml")) {
+        for (String file : List.of("messages.yml", "rules.yml", "villagers.yml", "events.yml", "kits.yml", "crafting.yml", "items.yml")) {
             if (!new File(plugin.getDataFolder(), file).exists()) {
                 plugin.saveResource(file, false);
             }

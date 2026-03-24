@@ -3,45 +3,116 @@ villagers:
     trades:
       helmet:
         currency: DIAMOND_BLOCK
-        currency-amount: 1
+        currency-amount: 3
         emerald-cost: 64
+        max-uses: 1
       chestplate:
         currency: DIAMOND_BLOCK
-        currency-amount: 1
+        currency-amount: 4
         emerald-cost: 64
+        max-uses: 1
   bottom:
     trades:
       leggings:
         currency: DIAMOND_BLOCK
-        currency-amount: 1
+        currency-amount: 3
         emerald-cost: 64
+        max-uses: 1
       boots:
         currency: DIAMOND_BLOCK
-        currency-amount: 1
+        currency-amount: 3
         emerald-cost: 64
+        max-uses: 1
       infinite_totem:
         currency: DIAMOND_BLOCK
-        currency-amount: 1
+        currency-amount: 5
         emerald-cost: 64
+        max-uses: 1
   tools:
     trades:
       sword:
         currency: DIAMOND_BLOCK
-        currency-amount: 1
+        currency-amount: 4
         emerald-cost: 64
+        max-uses: 1
       axe:
         currency: DIAMOND_BLOCK
-        currency-amount: 1
+        currency-amount: 3
         emerald-cost: 64
+        max-uses: 1
       pickaxe:
         currency: DIAMOND_BLOCK
-        currency-amount: 1
+        currency-amount: 5
         emerald-cost: 64
+        max-uses: 1
       bow:
         currency: DIAMOND_BLOCK
-        currency-amount: 1
+        currency-amount: 3
         emerald-cost: 64
+        max-uses: 1
       enchanted_gapple:
         currency: DIAMOND_BLOCK
-        currency-amount: 1
+        currency-amount: 7
         emerald-cost: 64
+        max-uses: 1
+
+# Rare bonus trades that can be added to normal non-plugin master villagers.
+# These are late-game diamond sinks, so keep them expensive and controlled.
+master-diamond-trades:
+  xp_bottles_small:
+    currency: DIAMOND
+    currency-amount: 32
+    result:
+      material: EXPERIENCE_BOTTLE
+      amount: 16
+    max-uses: 4
+    villager-experience: 20
+  xp_bottles_bulk:
+    currency: DIAMOND_BLOCK
+    currency-amount: 32
+    result:
+      material: EXPERIENCE_BOTTLE
+      amount: 64
+    max-uses: 2
+    villager-experience: 30
+  totem:
+    currency: DIAMOND_BLOCK
+    currency-amount: 3
+    result:
+      material: TOTEM_OF_UNDYING
+      amount: 1
+    max-uses: 2
+    villager-experience: 20
+  prospector_book:
+    currency: DIAMOND_BLOCK
+    currency-amount: 8
+    result:
+      perk-book: prospector
+    max-uses: 2
+    villager-experience: 30
+  bulwark_book:
+    currency: DIAMOND_BLOCK
+    currency-amount: 10
+    result:
+      perk-book: bulwark
+    max-uses: 2
+    villager-experience: 30
+  momentum_book:
+    currency: DIAMOND_BLOCK
+    currency-amount: 8
+    result:
+      perk-book: momentum
+    max-uses: 2
+    villager-experience: 30
+  prestige_component:
+    currency: DIAMOND_BLOCK
+    currency-amount: 16
+    result:
+      material: NETHER_STAR
+      amount: 1
+      name: "&6Royal Catalyst"
+      lore:
+        - "&7A prestige-grade crafting component."
+        - "&8Bought with absurd amounts of diamonds."
+    max-uses: 1
+    villager-experience: 40

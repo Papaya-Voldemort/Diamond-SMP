@@ -4,14 +4,15 @@ import io.github.diamondsmp.platform.paper.config.PluginSettings;
 import io.github.diamondsmp.platform.paper.item.GodItemRegistry;
 import io.github.diamondsmp.platform.paper.item.GodItemType;
 import io.github.diamondsmp.platform.paper.service.PurchaseHistoryStore;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -32,10 +33,11 @@ public final class GodVillagerService {
     private final PurchaseHistoryStore purchaseHistory;
     private final NamespacedKey villagerTypeKey;
     private final NamespacedKey eventKey;
-    private final NamespacedKey expiresKey;
     private final NamespacedKey ownerKey;
     private final NamespacedKey ownerNameKey;
     private final NamespacedKey tradeItemKey;
+    private final NamespacedKey eggMarkerKey;
+    private final NamespacedKey eggDroppedKey;
     private final Map<VillagerType, List<TradeDefinition>> definitions;
 
     public GodVillagerService(
@@ -51,10 +53,11 @@ public final class GodVillagerService {
         this.purchaseHistory = purchaseHistory;
         this.villagerTypeKey = new NamespacedKey(plugin, "god-villager-type");
         this.eventKey = new NamespacedKey(plugin, "god-villager-event");
-        this.expiresKey = new NamespacedKey(plugin, "god-villager-expires-at");
         this.ownerKey = new NamespacedKey(plugin, "god-villager-owner");
         this.ownerNameKey = new NamespacedKey(plugin, "god-villager-owner-name");
         this.tradeItemKey = new NamespacedKey(plugin, "god-villager-trade-item");
+        this.eggMarkerKey = new NamespacedKey(plugin, "god-villager-egg");
+        this.eggDroppedKey = new NamespacedKey(plugin, "god-villager-egg-dropped");
         this.definitions = loadDefinitions(villagersConfig);
         startFollowTask();
     }
@@ -64,34 +67,65 @@ public final class GodVillagerService {
     }
 
     public Villager spawn(Player player, VillagerType type, String eventName) {
-        Villager villager = (Villager) player.getWorld().spawnEntity(player.getLocation(), EntityType.VILLAGER);
-        villager.setAI(true);
-        villager.setInvulnerable(true);
-        villager.setCustomNameVisible(true);
-        villager.setRemoveWhenFarAway(false);
-        villager.setCollidable(false);
-        villager.setCanPickupItems(false);
-        villager.setSilent(true);
-        villager.setBreed(false);
-        villager.setAware(true);
-        villager.getPersistentDataContainer().set(villagerTypeKey, PersistentDataType.STRING, type.key());
-        villager.getPersistentDataContainer().set(eventKey, PersistentDataType.STRING, eventName.toLowerCase(Locale.ROOT));
-        villager.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING, player.getUniqueId().toString());
-        villager.getPersistentDataContainer().set(ownerNameKey, PersistentDataType.STRING, player.getName());
-        long expiresAt = Instant.now().plus(settings.villagers().despawnAfter()).toEpochMilli();
-        villager.getPersistentDataContainer().set(expiresKey, PersistentDataType.LONG, expiresAt);
-        villager.customName(net.kyori.adventure.text.Component.text(compactTitle(player.getName(), type)));
-        villager.setProfession(Villager.Profession.LIBRARIAN);
-        villager.setVillagerLevel(5);
-        villager.setVillagerExperience(0);
-        villager.setRecipes(buildRecipes(type));
+        return spawnManagedVillager(player.getLocation(), type, eventName, player.getUniqueId(), player.getName());
+    }
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            if (villager.isValid()) {
-                villager.remove();
+    public Villager spawnFromEgg(Location location, ItemStack egg) {
+        if (!isManagedVillagerEgg(egg)) {
+            return null;
+        }
+        ItemMeta meta = egg.getItemMeta();
+        VillagerType type = VillagerType.fromKey(meta.getPersistentDataContainer().get(villagerTypeKey, PersistentDataType.STRING));
+        if (type == null) {
+            return null;
+        }
+        UUID ownerId = null;
+        String owner = meta.getPersistentDataContainer().get(ownerNameKey, PersistentDataType.STRING);
+        String ownerValue = meta.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
+        if (ownerValue != null && !ownerValue.isBlank()) {
+            try {
+                ownerId = UUID.fromString(ownerValue);
+            } catch (IllegalArgumentException ignored) {
+                ownerId = null;
             }
-        }, settings.villagers().despawnAfter().toSeconds() * 20L);
-        return villager;
+        }
+        String eventName = meta.getPersistentDataContainer().get(eventKey, PersistentDataType.STRING);
+        return spawnManagedVillager(location, type, eventName == null ? "relocated" : eventName, ownerId, owner);
+    }
+
+    public ItemStack createRelocationEgg(Villager villager) {
+        ItemStack egg = new ItemStack(Material.VILLAGER_SPAWN_EGG);
+        ItemMeta meta = egg.getItemMeta();
+        meta.displayName(Component.text(compactTitle(ownerNameFor(villager), typeFor(villager))));
+        meta.getPersistentDataContainer().set(eggMarkerKey, PersistentDataType.BYTE, (byte) 1);
+        copyIdentity(villager, meta);
+        egg.setItemMeta(meta);
+        return egg;
+    }
+
+    public boolean shouldDropEgg(Villager villager, Player killer) {
+        if (!settings.villagers().dropEggOnKill() || hasDroppedEgg(villager)) {
+            return false;
+        }
+        if (settings.villagers().requirePlayerKillForEgg()) {
+            return killer != null;
+        }
+        return killer != null || settings.villagers().allowEnvironmentalEggDrop();
+    }
+
+    public void markEggDropped(Villager villager) {
+        villager.getPersistentDataContainer().set(eggDroppedKey, PersistentDataType.BYTE, (byte) 1);
+    }
+
+    public boolean hasDroppedEgg(Villager villager) {
+        return villager.getPersistentDataContainer().has(eggDroppedKey, PersistentDataType.BYTE);
+    }
+
+    public boolean isManagedVillagerEgg(ItemStack stack) {
+        if (stack == null || stack.getType() != Material.VILLAGER_SPAWN_EGG || !stack.hasItemMeta()) {
+            return false;
+        }
+        return stack.getItemMeta().getPersistentDataContainer().has(eggMarkerKey, PersistentDataType.BYTE);
     }
 
     public void resetPurchases() {
@@ -117,18 +151,15 @@ public final class GodVillagerService {
     }
 
     public void refreshTrades(Villager villager) {
-        VillagerType type = VillagerType.fromKey(villager.getPersistentDataContainer().get(villagerTypeKey, PersistentDataType.STRING));
+        VillagerType type = typeFor(villager);
         if (type != null) {
             villager.setRecipes(buildRecipes(type));
         }
     }
 
-    public Long expiryFor(Villager villager) {
-        return villager.getPersistentDataContainer().get(expiresKey, PersistentDataType.LONG);
-    }
-
     public String ownerNameFor(Villager villager) {
-        return villager.getPersistentDataContainer().get(ownerNameKey, PersistentDataType.STRING);
+        String owner = villager.getPersistentDataContainer().get(ownerNameKey, PersistentDataType.STRING);
+        return owner == null || owner.isBlank() ? "Unknown" : owner;
     }
 
     public UUID ownerIdFor(Villager villager) {
@@ -141,6 +172,10 @@ public final class GodVillagerService {
         } catch (IllegalArgumentException exception) {
             return null;
         }
+    }
+
+    public VillagerType typeFor(Villager villager) {
+        return VillagerType.fromKey(villager.getPersistentDataContainer().get(villagerTypeKey, PersistentDataType.STRING));
     }
 
     public boolean canUse(Player player, Villager villager) {
@@ -160,6 +195,33 @@ public final class GodVillagerService {
         purchaseHistory.markPurchased(itemKey);
     }
 
+    private Villager spawnManagedVillager(Location location, VillagerType type, String eventName, UUID ownerId, String ownerName) {
+        Villager villager = (Villager) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
+        villager.setAI(true);
+        villager.setCustomNameVisible(true);
+        villager.setRemoveWhenFarAway(false);
+        villager.setCollidable(false);
+        villager.setCanPickupItems(false);
+        villager.setSilent(true);
+        villager.setBreed(false);
+        villager.setAware(true);
+        villager.setPersistent(settings.villagers().persistManaged());
+        villager.getPersistentDataContainer().set(villagerTypeKey, PersistentDataType.STRING, type.key());
+        villager.getPersistentDataContainer().set(eventKey, PersistentDataType.STRING, eventName.toLowerCase(Locale.ROOT));
+        if (ownerId != null) {
+            villager.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING, ownerId.toString());
+        }
+        if (ownerName != null && !ownerName.isBlank()) {
+            villager.getPersistentDataContainer().set(ownerNameKey, PersistentDataType.STRING, ownerName);
+        }
+        villager.customName(Component.text(compactTitle(ownerName == null ? "Server" : ownerName, type)));
+        villager.setProfession(Villager.Profession.LIBRARIAN);
+        villager.setVillagerLevel(5);
+        villager.setVillagerExperience(0);
+        villager.setRecipes(buildRecipes(type));
+        return villager;
+    }
+
     private List<MerchantRecipe> buildRecipes(VillagerType type) {
         List<MerchantRecipe> recipes = new ArrayList<>();
         for (TradeDefinition trade : availableTrades(type)) {
@@ -171,8 +233,10 @@ public final class GodVillagerService {
             ItemMeta meta = result.getItemMeta();
             meta.getPersistentDataContainer().set(tradeItemKey, PersistentDataType.STRING, trade.itemKey());
             result.setItemMeta(meta);
-            MerchantRecipe recipe = new MerchantRecipe(result, 0, 1, false);
-            recipe.addIngredient(new ItemStack(trade.currency(), trade.currencyAmount()));
+            MerchantRecipe recipe = new MerchantRecipe(result, 0, trade.maxUses(), false, trade.villagerExperience(), 0.0F);
+            if (trade.currencyAmount() > 0) {
+                recipe.addIngredient(new ItemStack(trade.currency(), trade.currencyAmount()));
+            }
             if (trade.emeraldCost() > 0 && trade.currency() != Material.EMERALD) {
                 recipe.addIngredient(new ItemStack(Material.EMERALD, trade.emeraldCost()));
             } else if (trade.emeraldCost() > 0) {
@@ -191,22 +255,20 @@ public final class GodVillagerService {
 
     private Map<VillagerType, List<TradeDefinition>> loadDefinitions(FileConfiguration config) {
         return java.util.Arrays.stream(VillagerType.values()).collect(
-            java.util.stream.Collectors.toUnmodifiableMap(type -> type, type -> {
-                ConfigurationSection section = config.getConfigurationSection("villagers." + type.key() + ".trades");
+            java.util.stream.Collectors.toUnmodifiableMap(type -> type, value -> {
+                ConfigurationSection section = config.getConfigurationSection("villagers." + value.key() + ".trades");
                 if (section == null) {
                     return List.of();
                 }
-                return section.getKeys(false).stream()
-                    .map(key -> {
-                        ConfigurationSection trade = section.getConfigurationSection(key);
-                        if (trade == null) {
-                            return null;
-                        }
-                        PluginSettings.TradeEntry entry = PluginSettings.TradeEntry.fromSection(trade, settings.costFor(key, 64));
-                        Material currency = Objects.requireNonNullElse(entry.currency(), Material.EMERALD);
-                        return new TradeDefinition(entry.itemKey(), entry.emeraldCost(), currency, entry.currencyAmount());
-                    })
-                    .filter(Objects::nonNull)
+                return PluginSettings.loadTrades(section, settings).stream()
+                    .map(entry -> new TradeDefinition(
+                        entry.itemKey(),
+                        entry.emeraldCost(),
+                        Objects.requireNonNullElse(entry.currency(), Material.EMERALD),
+                        entry.currencyAmount(),
+                        entry.maxUses(),
+                        entry.villagerExperience()
+                    ))
                     .toList();
             })
         );
@@ -217,11 +279,6 @@ public final class GodVillagerService {
             for (org.bukkit.World world : Bukkit.getWorlds()) {
                 for (Villager villager : world.getEntitiesByClass(Villager.class)) {
                     if (!isManagedVillager(villager)) {
-                        continue;
-                    }
-                    Long expiry = expiryFor(villager);
-                    if (expiry != null && Instant.now().toEpochMilli() > expiry) {
-                        villager.remove();
                         continue;
                     }
                     UUID ownerId = ownerIdFor(villager);
@@ -245,6 +302,25 @@ public final class GodVillagerService {
         }, 20L, 20L);
     }
 
+    private void copyIdentity(Villager villager, ItemMeta meta) {
+        String type = villager.getPersistentDataContainer().get(villagerTypeKey, PersistentDataType.STRING);
+        String event = villager.getPersistentDataContainer().get(eventKey, PersistentDataType.STRING);
+        String owner = villager.getPersistentDataContainer().get(ownerNameKey, PersistentDataType.STRING);
+        String ownerId = villager.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
+        if (type != null) {
+            meta.getPersistentDataContainer().set(villagerTypeKey, PersistentDataType.STRING, type);
+        }
+        if (event != null) {
+            meta.getPersistentDataContainer().set(eventKey, PersistentDataType.STRING, event);
+        }
+        if (owner != null) {
+            meta.getPersistentDataContainer().set(ownerNameKey, PersistentDataType.STRING, owner);
+        }
+        if (ownerId != null) {
+            meta.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING, ownerId);
+        }
+    }
+
     private String compactTitle(String ownerName, VillagerType type) {
         String shortOwner = ownerName.length() > 10 ? ownerName.substring(0, 10) : ownerName;
         String label = switch (type) {
@@ -252,8 +328,15 @@ public final class GodVillagerService {
             case BOTTOM_ARMOR -> "Bottom";
             case TOOLS -> "Tools";
         };
-        return shortOwner + " " + label;
+        return shortOwner + " " + label + " Villager";
     }
 
-    private record TradeDefinition(String itemKey, int emeraldCost, Material currency, int currencyAmount) {}
+    private record TradeDefinition(
+        String itemKey,
+        int emeraldCost,
+        Material currency,
+        int currencyAmount,
+        int maxUses,
+        int villagerExperience
+    ) {}
 }

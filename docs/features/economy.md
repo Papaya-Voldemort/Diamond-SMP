@@ -9,13 +9,23 @@ Diamond SMP does not run a full currency plugin economy. Its economy is a progre
 - Reward villagers sell god items.
 - Prices combine item-specific currency and optional emerald cost.
 - Stock retires globally after purchase.
-- This makes event wins matter across the whole server, not only for one player.
+- God-item prices are intentionally much higher than the original defaults so late-game purchases feel prestigious again.
 
-### Diamond Pressure
+### Diamond Sinks
 
-- Diamond acquisition is intentionally boosted.
-- Diamond blocks are the default special currency for reward villagers.
-- This keeps the server valuable-resource economy focused on active play rather than passive enchant-table progression.
+- Diamonds are still valuable, but the plugin now pushes rich players toward expensive late-game sinks instead of letting ores flood the economy.
+- Main sinks:
+  - prestige enchanted golden apples
+  - expensive perk books
+  - high-cost god items
+  - rare bonus trades on normal master villagers
+
+### Master Villager Bonus Trades
+
+- Normal non-plugin villagers can gain one extra diamond-heavy trade at master level.
+- The default chance is `20%`.
+- Reward pools are configurable and intentionally expensive.
+- Plugin-managed reward villagers do not receive these extra vanilla-master trades.
 
 ### Utility Economy
 

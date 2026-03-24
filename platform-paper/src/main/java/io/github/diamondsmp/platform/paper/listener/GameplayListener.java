@@ -5,6 +5,8 @@ import io.github.diamondsmp.platform.paper.advancement.MythicalAdvancementServic
 import io.github.diamondsmp.platform.paper.config.MessageBundle;
 import io.github.diamondsmp.platform.paper.config.PluginSettings;
 import io.github.diamondsmp.platform.paper.event.ServerEventManager;
+import io.github.diamondsmp.platform.paper.item.DiamondPerkRegistry;
+import io.github.diamondsmp.platform.paper.item.DiamondPerkType;
 import io.github.diamondsmp.platform.paper.item.GodItemRegistry;
 import io.github.diamondsmp.platform.paper.item.GodItemType;
 import io.github.diamondsmp.platform.paper.service.CombatStateService;
@@ -41,6 +43,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -75,6 +78,7 @@ public final class GameplayListener implements Listener {
     private final PluginSettings settings;
     private final MessageBundle messages;
     private final GodItemRegistry godItems;
+    private final DiamondPerkRegistry perks;
     private final CooldownService cooldowns;
     private final CombatStateService combatState;
     private final TrustService trustService;
@@ -91,6 +95,7 @@ public final class GameplayListener implements Listener {
         PluginSettings settings,
         MessageBundle messages,
         GodItemRegistry godItems,
+        DiamondPerkRegistry perks,
         CooldownService cooldowns,
         CombatStateService combatState,
         TrustService trustService,
@@ -104,6 +109,7 @@ public final class GameplayListener implements Listener {
         this.settings = settings;
         this.messages = messages;
         this.godItems = godItems;
+        this.perks = perks;
         this.cooldowns = cooldowns;
         this.combatState = combatState;
         this.trustService = trustService;
@@ -187,6 +193,17 @@ public final class GameplayListener implements Listener {
         }
         if (event.getDamager() instanceof AbstractArrow) {
             processGodBowShot(victim, event);
+        }
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        if (perks.resolveApplied(player.getInventory().getChestplate()) == DiamondPerkType.BULWARK) {
+            double reduction = Math.max(0.0D, Math.min(0.8D, settings.combat().bulwarkDamageReduction()));
+            event.setDamage(event.getDamage() * (1.0D - reduction));
         }
     }
 
@@ -298,6 +315,7 @@ public final class GameplayListener implements Listener {
         }
         ItemStack tool = player.getInventory().getItemInMainHand();
         if (!godItems.isGodItem(tool, GodItemType.PICKAXE)) {
+            applyProspectorBonus(event, tool);
             return;
         }
         if (!isVeinMineTarget(event.getBlock().getType())) {
@@ -382,6 +400,7 @@ public final class GameplayListener implements Listener {
         applyArmorEffect(player, inventory.getLeggings(), GodItemType.LEGGINGS, PotionEffectType.RESISTANCE, 1);
         applyArmorEffect(player, inventory.getBoots(), GodItemType.BOOTS, PotionEffectType.SPEED, 1);
         applyHeldEffect(player, inventory.getItemInMainHand(), GodItemType.SWORD, PotionEffectType.STRENGTH, 0);
+        applyPerkEffect(player, inventory.getBoots(), DiamondPerkType.MOMENTUM, PotionEffectType.SPEED, 0);
         applyDragonEggEffect(player);
     }
 
@@ -409,6 +428,12 @@ public final class GameplayListener implements Listener {
 
     private void applyHeldEffect(Player player, ItemStack item, GodItemType type, PotionEffectType effect, int amplifier) {
         if (godItems.isGodItem(item, type)) {
+            player.addPotionEffect(new PotionEffect(effect, 60, amplifier, true, false, true));
+        }
+    }
+
+    private void applyPerkEffect(Player player, ItemStack item, DiamondPerkType type, PotionEffectType effect, int amplifier) {
+        if (perks.resolveApplied(item) == type) {
             player.addPotionEffect(new PotionEffect(effect, 60, amplifier, true, false, true));
         }
     }
@@ -442,6 +467,27 @@ public final class GameplayListener implements Listener {
             }
         }
         victim.getInventory().setArmorContents(armor);
+    }
+
+    private void applyProspectorBonus(BlockBreakEvent event, ItemStack tool) {
+        if (perks.resolveApplied(tool) != DiamondPerkType.PROSPECTOR) {
+            return;
+        }
+        Material type = event.getBlock().getType();
+        Material bonusDrop = switch (type) {
+            case DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE -> Material.DIAMOND;
+            case IRON_ORE, DEEPSLATE_IRON_ORE -> Material.RAW_IRON;
+            case GOLD_ORE, DEEPSLATE_GOLD_ORE -> Material.RAW_GOLD;
+            case COAL_ORE, DEEPSLATE_COAL_ORE -> Material.COAL;
+            default -> null;
+        };
+        if (bonusDrop == null || tool.containsEnchantment(org.bukkit.enchantments.Enchantment.SILK_TOUCH)) {
+            return;
+        }
+        if (Math.random() > settings.combat().prospectorExtraDropChance()) {
+            return;
+        }
+        event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), new ItemStack(bonusDrop, 1));
     }
 
     private void processGodBowShot(LivingEntity victim, EntityDamageByEntityEvent event) {

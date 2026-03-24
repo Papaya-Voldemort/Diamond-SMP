@@ -11,17 +11,47 @@ combat:
   god-bow-velocity: 3.2
   god-bow-range: 48.0
   axe-armor-durability-multiplier: 3.0
+  bulwark-damage-reduction: 0.12
+  prospector-extra-drop-chance: 0.18
   bedrock-break-seconds: 30
   tag-seconds: 15
 
 world:
-  diamond-drop-multiplier: 3.0
-  exposed-diamond-multiplier: 5.0
-  diamond-vein-size-multiplier: 2.0
+  # Changes below apply primarily to newly generated chunks. Existing explored chunks
+  # will keep their current ore layout unless you regenerate them outside the plugin.
+  diamond-drop-multiplier: 1.0
   remove-ancient-debris-from-new-chunks: true
   disable-netherite-progression: true
   disable-restricted-enchants: true
   disable-strength-ii: true
+  diamond:
+    enabled: true
+    # Small bump only. Diamonds should stay exciting, not turn into dirt.
+    vein-size-multiplier: 1.2
+    extra-cluster-attempts: 1
+    max-added-blocks-per-vein: 2
+    # Caps exposed-chain growth so one pocket does not snowball into a cave wall of diamonds.
+    exposed-max-additions: 1
+  iron:
+    enabled: true
+    # Iron is the main progression ore, so this gets the biggest buff.
+    vein-size-multiplier: 1.45
+    extra-cluster-attempts: 3
+    max-added-blocks-per-vein: 5
+    exposed-max-additions: 0
+  gold:
+    enabled: true
+    vein-size-multiplier: 1.25
+    extra-cluster-attempts: 2
+    max-added-blocks-per-vein: 3
+    exposed-max-additions: 0
+  coal:
+    enabled: true
+    # Coal should feel reliably bulk-available during normal mining.
+    vein-size-multiplier: 1.6
+    extra-cluster-attempts: 4
+    max-added-blocks-per-vein: 6
+    exposed-max-additions: 0
 
 owner-control:
   owner-name: "SandersonFan"
@@ -29,18 +59,26 @@ owner-control:
   owner-uuid-trimmed: "8a20d85a4767454cb3cf61a26409c894"
 
 villagers:
-  despawn-minutes: 30
+  # Legacy setting kept for backwards compatibility. Managed reward villagers now persist
+  # indefinitely unless intentionally killed or removed.
+  despawn-minutes: 0
+  persist-managed: true
+  drop-egg-on-kill: true
+  require-player-kill-for-egg: false
+  allow-environmental-egg-drop: true
+  # Chance for a normal non-plugin master villager to gain an extra diamond sink trade.
+  master-diamond-trade-chance: 0.20
   costs:
-    helmet: 64
-    chestplate: 64
-    leggings: 64
-    boots: 64
-    sword: 64
-    axe: 64
-    pickaxe: 64
-    bow: 64
-    infinite_totem: 64
-    enchanted_gapple: 64
+    helmet: 192
+    chestplate: 224
+    leggings: 192
+    boots: 192
+    sword: 224
+    axe: 192
+    pickaxe: 256
+    bow: 192
+    infinite_totem: 320
+    enchanted_gapple: 448
 
 kits:
   allow-regular-users: true

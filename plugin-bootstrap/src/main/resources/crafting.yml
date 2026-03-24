@@ -1,3 +1,13 @@
 recipes:
   easy-gaps: true
   easy-cobs: true
+  prestige-god-apple:
+    enabled: true
+    result-amount: 1
+    center-item: GOLDEN_APPLE
+    surround-item: DIAMOND_BLOCK
+    surround-stack-size: 64
+    # This recipe is validated by the plugin, not vanilla. Players must place
+    # eight full stacks of diamond blocks around one golden apple in a normal
+    # crafting table. Existing explored chunks are unaffected by ore rebalance.
+    exact-stacks-required: true

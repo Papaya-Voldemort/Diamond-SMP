@@ -37,25 +37,24 @@ public record PluginSettings(
                 config.getDouble("combat.god-bow-velocity", 3.2D),
                 config.getDouble("combat.god-bow-range", 48.0D),
                 config.getDouble("combat.axe-armor-durability-multiplier", 3.0D),
+                config.getDouble("combat.bulwark-damage-reduction", 0.12D),
+                config.getDouble("combat.prospector-extra-drop-chance", 0.18D),
                 Duration.ofSeconds(config.getLong("combat.bedrock-break-seconds", 30L)),
                 Duration.ofSeconds(config.getLong("combat.tag-seconds", 15L))
             ),
-            new WorldRules(
-                config.getDouble("world.diamond-drop-multiplier", 3.0D),
-                config.getDouble("world.exposed-diamond-multiplier", 5.0D),
-                config.getDouble("world.diamond-vein-size-multiplier", 2.0D),
-                config.getBoolean("world.remove-ancient-debris-from-new-chunks", true),
-                config.getBoolean("world.disable-netherite-progression", true),
-                config.getBoolean("world.disable-restricted-enchants", true),
-                config.getBoolean("world.disable-strength-ii", true)
-            ),
+            loadWorldRules(config.getConfigurationSection("world")),
             new OwnerControl(
                 config.getString("owner-control.owner-name", "SandersonFan"),
                 config.getString("owner-control.owner-uuid", ""),
                 config.getString("owner-control.owner-uuid-trimmed", "")
             ),
             new Villagers(
-                Duration.ofMinutes(config.getLong("villagers.despawn-minutes", 30L)),
+                Duration.ofMinutes(config.getLong("villagers.despawn-minutes", 0L)),
+                config.getBoolean("villagers.persist-managed", true),
+                config.getBoolean("villagers.drop-egg-on-kill", true),
+                config.getBoolean("villagers.require-player-kill-for-egg", false),
+                config.getBoolean("villagers.allow-environmental-egg-drop", true),
+                clampChance(config.getDouble("villagers.master-diamond-trade-chance", 0.20D)),
                 loadTradeCosts(config.getConfigurationSection("villagers.costs"))
             ),
             new Kits(
@@ -77,6 +76,37 @@ public record PluginSettings(
             ),
             loadPvp(config),
             loadBranding(config)
+        );
+    }
+
+    private static WorldRules loadWorldRules(ConfigurationSection section) {
+        if (section == null) {
+            return WorldRules.defaults();
+        }
+        WorldRules defaults = WorldRules.defaults();
+        return new WorldRules(
+            section.getDouble("diamond-drop-multiplier", defaults.diamondDropMultiplier()),
+            section.getBoolean("remove-ancient-debris-from-new-chunks", defaults.removeAncientDebrisFromNewChunks()),
+            section.getBoolean("disable-netherite-progression", defaults.disableNetheriteProgression()),
+            section.getBoolean("disable-restricted-enchants", defaults.disableRestrictedEnchants()),
+            section.getBoolean("disable-strength-ii", defaults.disableStrengthTwo()),
+            loadOreBalance(section.getConfigurationSection("diamond"), defaults.diamondOre()),
+            loadOreBalance(section.getConfigurationSection("iron"), defaults.ironOre()),
+            loadOreBalance(section.getConfigurationSection("gold"), defaults.goldOre()),
+            loadOreBalance(section.getConfigurationSection("coal"), defaults.coalOre())
+        );
+    }
+
+    private static OreBalance loadOreBalance(ConfigurationSection section, OreBalance defaults) {
+        if (section == null) {
+            return defaults;
+        }
+        return new OreBalance(
+            section.getBoolean("enabled", defaults.enabled()),
+            section.getDouble("vein-size-multiplier", defaults.veinSizeMultiplier()),
+            Math.max(0, section.getInt("extra-cluster-attempts", defaults.extraClusterAttempts())),
+            Math.max(0, section.getInt("max-added-blocks-per-vein", defaults.maxAddedBlocksPerVein())),
+            Math.max(0, section.getInt("exposed-max-additions", defaults.exposedMaxAdditions()))
         );
     }
 
@@ -114,7 +144,7 @@ public record PluginSettings(
             pvp.getBoolean("enabled", false),
             pvp.getBoolean("beta", true),
             pvp.getString("world-name", "diamond_pvp_beta"),
-            java.time.Duration.ofSeconds(pvp.getLong("party-invite-timeout-seconds", 60L)),
+            Duration.ofSeconds(pvp.getLong("party-invite-timeout-seconds", 60L)),
             pvp.getInt("arena-count", 4),
             new PvpArena(
                 pvp.getInt("arena.y-level", 90),
@@ -238,6 +268,10 @@ public record PluginSettings(
         );
     }
 
+    private static double clampChance(double chance) {
+        return Math.max(0.0D, Math.min(1.0D, chance));
+    }
+
     public int costFor(String itemKey, int fallback) {
         return villagers.tradeCosts().getOrDefault(itemKey.toLowerCase(Locale.ROOT), fallback);
     }
@@ -250,23 +284,57 @@ public record PluginSettings(
         double godBowVelocity,
         double godBowRange,
         double axeArmorDurabilityMultiplier,
+        double bulwarkDamageReduction,
+        double prospectorExtraDropChance,
         Duration bedrockBreakTime,
         Duration combatTagTime
     ) {}
 
     public record WorldRules(
         double diamondDropMultiplier,
-        double exposedDiamondMultiplier,
-        double diamondVeinSizeMultiplier,
         boolean removeAncientDebrisFromNewChunks,
         boolean disableNetheriteProgression,
         boolean disableRestrictedEnchants,
-        boolean disableStrengthTwo
+        boolean disableStrengthTwo,
+        OreBalance diamondOre,
+        OreBalance ironOre,
+        OreBalance goldOre,
+        OreBalance coalOre
+    ) {
+        public static WorldRules defaults() {
+            return new WorldRules(
+                1.0D,
+                true,
+                true,
+                true,
+                true,
+                new OreBalance(true, 1.2D, 1, 2, 1),
+                new OreBalance(true, 1.45D, 3, 5, 0),
+                new OreBalance(true, 1.25D, 2, 3, 0),
+                new OreBalance(true, 1.6D, 4, 6, 0)
+            );
+        }
+    }
+
+    public record OreBalance(
+        boolean enabled,
+        double veinSizeMultiplier,
+        int extraClusterAttempts,
+        int maxAddedBlocksPerVein,
+        int exposedMaxAdditions
     ) {}
 
     public record OwnerControl(String ownerName, String ownerUuid, String ownerUuidTrimmed) {}
 
-    public record Villagers(Duration despawnAfter, Map<String, Integer> tradeCosts) {}
+    public record Villagers(
+        Duration despawnAfter,
+        boolean persistManaged,
+        boolean dropEggOnKill,
+        boolean requirePlayerKillForEgg,
+        boolean allowEnvironmentalEggDrop,
+        double masterDiamondTradeChance,
+        Map<String, Integer> tradeCosts
+    ) {}
 
     public record Kits(boolean allowRegularUsers) {}
 
@@ -460,13 +528,22 @@ public record PluginSettings(
         }
     }
 
-    public record TradeEntry(String itemKey, int emeraldCost, Material currency, int currencyAmount) {
+    public record TradeEntry(
+        String itemKey,
+        int emeraldCost,
+        Material currency,
+        int currencyAmount,
+        int maxUses,
+        int villagerExperience
+    ) {
         public static TradeEntry fromSection(ConfigurationSection section, int defaultCost) {
             return new TradeEntry(
                 section.getName(),
                 section.getInt("emerald-cost", defaultCost),
                 Material.matchMaterial(section.getString("currency", "EMERALD")),
-                section.getInt("currency-amount", 1)
+                Math.max(1, section.getInt("currency-amount", 1)),
+                Math.max(1, section.getInt("max-uses", 1)),
+                Math.max(0, section.getInt("villager-experience", 0))
             );
         }
     }
@@ -479,7 +556,7 @@ public record PluginSettings(
             .map(key -> {
                 ConfigurationSection child = section.getConfigurationSection(key);
                 if (child == null) {
-                    return new TradeEntry(key, settings.costFor(key, 64), Material.EMERALD, 1);
+                    return new TradeEntry(key, settings.costFor(key, 64), Material.EMERALD, 1, 1, 0);
                 }
                 return TradeEntry.fromSection(child, settings.costFor(key, 64));
             })

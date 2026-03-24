@@ -2,28 +2,32 @@ package io.github.diamondsmp.platform.paper.listener;
 
 import io.github.diamondsmp.platform.paper.config.MessageBundle;
 import io.github.diamondsmp.platform.paper.gui.RulesGui;
+import io.github.diamondsmp.platform.paper.villager.DiamondMasterTradeService;
 import io.github.diamondsmp.platform.paper.villager.GodVillagerService;
-import java.time.Instant;
 import java.util.Map;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.entity.Villager;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.MerchantInventory;
 
 public final class GuiAndVillagerListener implements Listener {
     private final RulesGui rulesGui;
     private final GodVillagerService villagerService;
+    private final DiamondMasterTradeService diamondTrades;
     private final MessageBundle messages;
 
-    public GuiAndVillagerListener(RulesGui rulesGui, GodVillagerService villagerService, MessageBundle messages) {
+    public GuiAndVillagerListener(RulesGui rulesGui, GodVillagerService villagerService, DiamondMasterTradeService diamondTrades, MessageBundle messages) {
         this.rulesGui = rulesGui;
         this.villagerService = villagerService;
+        this.diamondTrades = diamondTrades;
         this.messages = messages;
     }
 
@@ -68,12 +72,6 @@ public final class GuiAndVillagerListener implements Listener {
         if (!(event.getRightClicked() instanceof Villager villager) || !villagerService.isManagedVillager(villager)) {
             return;
         }
-        Long expiry = villagerService.expiryFor(villager);
-        if (expiry != null && Instant.now().toEpochMilli() > expiry) {
-            villager.remove();
-            event.getPlayer().sendMessage(messages.prefixed("villager.expired", "&cThis reward villager has expired."));
-            return;
-        }
         if (!villagerService.canUse(event.getPlayer(), villager)) {
             event.setCancelled(true);
             event.getPlayer().sendMessage(messages.format(
@@ -94,6 +92,7 @@ public final class GuiAndVillagerListener implements Listener {
         if (!(merchant instanceof Villager villager)) {
             return;
         }
+        diamondTrades.ensureTrades(villager);
         if (!villagerService.isManagedVillager(villager)) {
             return;
         }
@@ -111,9 +110,36 @@ public final class GuiAndVillagerListener implements Listener {
     }
 
     @EventHandler
-    public void onManagedVillagerDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Villager villager && villagerService.isManagedVillager(villager)) {
-            event.setCancelled(true);
+    public void onManagedVillagerDeath(EntityDeathEvent event) {
+        if (!(event.getEntity() instanceof Villager villager) || !villagerService.isManagedVillager(villager)) {
+            return;
+        }
+        if (!villagerService.shouldDropEgg(villager, villager.getKiller())) {
+            return;
+        }
+        villagerService.markEggDropped(villager);
+        event.getDrops().add(villagerService.createRelocationEgg(villager));
+    }
+
+    @EventHandler
+    public void onRelocationEggUse(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+        if (!villagerService.isManagedVillagerEgg(event.getItem())) {
+            return;
+        }
+        if (event.getClickedBlock() == null) {
+            return;
+        }
+        org.bukkit.Location spawnLocation = event.getClickedBlock().getRelative(event.getBlockFace()).getLocation().add(0.5D, 0.0D, 0.5D);
+        Villager villager = villagerService.spawnFromEgg(spawnLocation, event.getItem());
+        if (villager == null) {
+            return;
+        }
+        event.setCancelled(true);
+        if (event.getItem() != null) {
+            event.getItem().setAmount(event.getItem().getAmount() - 1);
         }
     }
 }

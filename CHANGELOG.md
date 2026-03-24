@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.6 - 2026-03-24
+
+- Rebalanced new-chunk ore pressure so diamonds are toned down while iron, gold, and coal are boosted through configurable chunk rewrite settings
+- Reworked managed reward villagers into persistent, killable fixtures that drop tagged relocation eggs instead of expiring after 30 minutes
+- Added exact-stack prestige enchanted golden apple crafting and rare master-villager diamond sink trades with expensive perk books
+- Increased god-item prices and documented the new economy and villager behavior for live-server rollout
+
 ## 1.0.5 - 2026-03-22
 
 - Fixed restricted enchant handling so normal `Protection IV` and `Sharpness V` items downgrade to the allowed cap instead of being blocked outright

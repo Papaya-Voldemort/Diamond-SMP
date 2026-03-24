@@ -1,8 +1,13 @@
 package io.github.diamondsmp.platform.paper.listener;
 
+import io.github.diamondsmp.platform.paper.config.CraftingSettings;
 import io.github.diamondsmp.platform.paper.config.PluginSettings;
+import io.github.diamondsmp.platform.paper.item.DiamondPerkRegistry;
+import io.github.diamondsmp.platform.paper.item.DiamondPerkType;
 import io.github.diamondsmp.platform.paper.item.GodItemRegistry;
 import io.github.diamondsmp.platform.paper.item.GodItemType;
+import io.github.diamondsmp.platform.paper.villager.DiamondMasterTradeService;
+import io.github.diamondsmp.platform.paper.villager.GodVillagerService;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -11,10 +16,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,6 +31,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 import org.bukkit.event.inventory.BrewEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -43,6 +53,8 @@ import org.bukkit.inventory.SmithingInventory;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
@@ -64,27 +76,50 @@ public final class RestrictionListener implements Listener {
     );
 
     private final PluginSettings settings;
+    private final CraftingSettings craftingSettings;
     private final GodItemRegistry godItems;
+    private final DiamondPerkRegistry perks;
+    private final GodVillagerService godVillagers;
+    private final DiamondMasterTradeService diamondMasterTrades;
+    private final NamespacedKey prestigeGappleKey;
 
-    public RestrictionListener(PluginSettings settings, GodItemRegistry godItems) {
+    public RestrictionListener(
+        JavaPlugin plugin,
+        PluginSettings settings,
+        CraftingSettings craftingSettings,
+        GodItemRegistry godItems,
+        DiamondPerkRegistry perks,
+        GodVillagerService godVillagers,
+        DiamondMasterTradeService diamondMasterTrades
+    ) {
         this.settings = settings;
+        this.craftingSettings = craftingSettings;
         this.godItems = godItems;
+        this.perks = perks;
+        this.godVillagers = godVillagers;
+        this.diamondMasterTrades = diamondMasterTrades;
+        this.prestigeGappleKey = new NamespacedKey(plugin, "prestige-god-apple-result");
     }
 
     @EventHandler
     public void onPrepareCraft(PrepareItemCraftEvent event) {
         CraftingInventory inventory = event.getInventory();
+        ItemStack prestigeGapple = preparePrestigeGapple(inventory);
+        if (prestigeGapple != null) {
+            inventory.setResult(prestigeGapple);
+            return;
+        }
         ItemStack result = inventory.getResult();
         if (result == null) {
             return;
         }
-        if (result.getType() == Material.GOLDEN_APPLE) {
+        if (craftingSettings.easyGaps() && result.getType() == Material.GOLDEN_APPLE) {
             result = result.clone();
             result.setAmount(8);
             inventory.setResult(result);
             return;
         }
-        if (result.getType() == Material.COBWEB) {
+        if (craftingSettings.easyCobs() && result.getType() == Material.COBWEB) {
             result = result.clone();
             result.setAmount(5);
             inventory.setResult(result);
@@ -99,6 +134,10 @@ public final class RestrictionListener implements Listener {
 
     @EventHandler
     public void onCraft(CraftItemEvent event) {
+        if (isPrestigeGappleRecipe(event.getInventory().getMatrix())) {
+            handlePrestigeGappleCraft(event);
+            return;
+        }
         ItemStack current = event.getCurrentItem();
         if (current == null) {
             return;
@@ -121,6 +160,13 @@ public final class RestrictionListener implements Listener {
 
     @EventHandler
     public void onPrepareAnvil(PrepareAnvilEvent event) {
+        ItemStack left = event.getInventory().getFirstItem();
+        ItemStack right = event.getInventory().getSecondItem();
+        DiamondPerkType perk = perks.resolveBook(right);
+        if (perk != null) {
+            event.setResult(perks.apply(perk, left));
+            return;
+        }
         ItemStack result = event.getResult();
         if (result == null) {
             return;
@@ -188,47 +234,7 @@ public final class RestrictionListener implements Listener {
             stripAncientDebris(event);
         }
         if (event.getWorld().getEnvironment() == World.Environment.NORMAL) {
-            boostDiamonds(event);
-        }
-    }
-
-    private void stripAncientDebris(ChunkLoadEvent event) {
-        int minY = event.getWorld().getMinHeight();
-        int maxY = event.getWorld().getMaxHeight();
-        for (int x = 0; x < 16; x++) {
-            for (int z = 0; z < 16; z++) {
-                for (int y = minY; y < maxY; y++) {
-                    Block block = event.getChunk().getBlock(x, y, z);
-                    if (block.getType() == Material.ANCIENT_DEBRIS) {
-                        block.setType(Material.NETHERRACK, false);
-                    }
-                }
-            }
-        }
-    }
-
-    private void boostDiamonds(ChunkLoadEvent event) {
-        Set<Long> processed = new HashSet<>();
-        int minBlockX = event.getChunk().getX() << 4;
-        int maxBlockX = minBlockX + 15;
-        int minBlockZ = event.getChunk().getZ() << 4;
-        int maxBlockZ = minBlockZ + 15;
-        int minY = event.getWorld().getMinHeight();
-        int maxY = event.getWorld().getMaxHeight();
-        for (int x = 0; x < 16; x++) {
-            for (int z = 0; z < 16; z++) {
-                for (int y = minY; y < maxY; y++) {
-                    Block block = event.getChunk().getBlock(x, y, z);
-                    if (!isDiamondOre(block.getType()) || !processed.add(block.getBlockKey())) {
-                        continue;
-                    }
-                    List<Block> vein = collectVein(block, processed, minBlockX, maxBlockX, minBlockZ, maxBlockZ);
-                    expandVein(vein, minBlockX, maxBlockX, minBlockZ, maxBlockZ);
-                    if (isExposed(block, minBlockX, maxBlockX, minBlockZ, maxBlockZ)) {
-                        multiplyExposed(block, minBlockX, maxBlockX, minBlockZ, maxBlockZ);
-                    }
-                }
-            }
+            rebalanceOverworldOres(event);
         }
     }
 
@@ -322,6 +328,9 @@ public final class RestrictionListener implements Listener {
         if (!sanitized.equals(result)) {
             event.setRecipe(copyRecipeWithResult(event.getRecipe(), sanitized));
         }
+        if (event.getEntity() instanceof Villager villager) {
+            diamondMasterTrades.ensureTrades(villager);
+        }
     }
 
     @EventHandler
@@ -332,13 +341,60 @@ public final class RestrictionListener implements Listener {
         if (!(inventory.getMerchant() instanceof Villager villager)) {
             return;
         }
+        diamondMasterTrades.ensureTrades(villager);
         sanitizeMerchantRecipes(villager);
     }
 
-    private boolean isRestrictedNetherite(ItemStack stack) {
-        return settings.worldRules().disableNetheriteProgression()
-            && NETHERITE_ITEMS.contains(stack.getType())
-            && !godItems.isAnyGodItem(stack);
+    private void stripAncientDebris(ChunkLoadEvent event) {
+        int minY = event.getWorld().getMinHeight();
+        int maxY = event.getWorld().getMaxHeight();
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = minY; y < maxY; y++) {
+                    Block block = event.getChunk().getBlock(x, y, z);
+                    if (block.getType() == Material.ANCIENT_DEBRIS) {
+                        block.setType(Material.NETHERRACK, false);
+                    }
+                }
+            }
+        }
+    }
+
+    private void rebalanceOverworldOres(ChunkLoadEvent event) {
+        Set<Long> processed = new HashSet<>();
+        int minBlockX = event.getChunk().getX() << 4;
+        int maxBlockX = minBlockX + 15;
+        int minBlockZ = event.getChunk().getZ() << 4;
+        int maxBlockZ = minBlockZ + 15;
+        int minY = event.getWorld().getMinHeight();
+        int maxY = event.getWorld().getMaxHeight();
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = minY; y < maxY; y++) {
+                    Block block = event.getChunk().getBlock(x, y, z);
+                    PluginSettings.OreBalance balance = oreBalance(block.getType());
+                    if (balance == null || !balance.enabled() || !processed.add(block.getBlockKey())) {
+                        continue;
+                    }
+                    List<Block> vein = collectVein(block, processed, minBlockX, maxBlockX, minBlockZ, maxBlockZ);
+                    expandVein(vein, block.getType(), balance, minBlockX, maxBlockX, minBlockZ, maxBlockZ);
+                    addNearbyClusters(vein, block.getType(), balance, minBlockX, maxBlockX, minBlockZ, maxBlockZ);
+                    if (balance.exposedMaxAdditions() > 0 && isExposed(block, minBlockX, maxBlockX, minBlockZ, maxBlockZ)) {
+                        multiplyExposed(block, block.getType(), balance.exposedMaxAdditions(), minBlockX, maxBlockX, minBlockZ, maxBlockZ);
+                    }
+                }
+            }
+        }
+    }
+
+    private PluginSettings.OreBalance oreBalance(Material material) {
+        return switch (material) {
+            case DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE -> settings.worldRules().diamondOre();
+            case IRON_ORE, DEEPSLATE_IRON_ORE -> settings.worldRules().ironOre();
+            case GOLD_ORE, DEEPSLATE_GOLD_ORE -> settings.worldRules().goldOre();
+            case COAL_ORE, DEEPSLATE_COAL_ORE -> settings.worldRules().coalOre();
+            default -> null;
+        };
     }
 
     private List<Block> collectVein(Block start, Set<Long> processed, int minBlockX, int maxBlockX, int minBlockZ, int maxBlockZ) {
@@ -348,7 +404,7 @@ public final class RestrictionListener implements Listener {
         Material target = start.getType();
         while (!queue.isEmpty()) {
             Block block = queue.removeFirst();
-            if (!isDiamondOre(block.getType()) || block.getType() != target) {
+            if (block.getType() != target) {
                 continue;
             }
             vein.add(block);
@@ -372,8 +428,19 @@ public final class RestrictionListener implements Listener {
         return vein;
     }
 
-    private void expandVein(List<Block> vein, int minBlockX, int maxBlockX, int minBlockZ, int maxBlockZ) {
-        int extra = Math.max(0, (int) Math.ceil(vein.size() * (settings.worldRules().diamondVeinSizeMultiplier() - 1.0D)));
+    private void expandVein(
+        List<Block> vein,
+        Material oreType,
+        PluginSettings.OreBalance balance,
+        int minBlockX,
+        int maxBlockX,
+        int minBlockZ,
+        int maxBlockZ
+    ) {
+        int extra = Math.min(
+            balance.maxAddedBlocksPerVein(),
+            Math.max(0, (int) Math.ceil(vein.size() * (balance.veinSizeMultiplier() - 1.0D)))
+        );
         if (extra == 0) {
             return;
         }
@@ -387,16 +454,13 @@ public final class RestrictionListener implements Listener {
                             continue;
                         }
                         Block candidate = getRelativeIfInsideChunk(ore, dx, dy, dz, minBlockX, maxBlockX, minBlockZ, maxBlockZ);
-                        if (candidate == null) {
+                        if (candidate == null || existing.contains(candidate.getBlockKey()) || !converted.add(candidate.getBlockKey())) {
                             continue;
                         }
-                        if (existing.contains(candidate.getBlockKey()) || !converted.add(candidate.getBlockKey())) {
+                        if (!isReplaceableOreHost(candidate, oreType)) {
                             continue;
                         }
-                        if (!isReplaceableDiamondHost(candidate, ore.getType())) {
-                            continue;
-                        }
-                        candidate.setType(ore.getType(), false);
+                        candidate.setType(oreType, false);
                         extra--;
                     }
                 }
@@ -404,8 +468,43 @@ public final class RestrictionListener implements Listener {
         }
     }
 
-    private void multiplyExposed(Block source, int minBlockX, int maxBlockX, int minBlockZ, int maxBlockZ) {
-        int extra = Math.max(0, (int) Math.ceil(settings.worldRules().exposedDiamondMultiplier() - 1.0D));
+    private void addNearbyClusters(
+        List<Block> vein,
+        Material oreType,
+        PluginSettings.OreBalance balance,
+        int minBlockX,
+        int maxBlockX,
+        int minBlockZ,
+        int maxBlockZ
+    ) {
+        if (balance.extraClusterAttempts() <= 0 || balance.maxAddedBlocksPerVein() <= 0 || vein.isEmpty()) {
+            return;
+        }
+        Set<Long> converted = new HashSet<>();
+        int extra = balance.maxAddedBlocksPerVein();
+        for (int attempt = 0; attempt < balance.extraClusterAttempts() && extra > 0; attempt++) {
+            Block anchor = vein.get(ThreadLocalRandom.current().nextInt(vein.size()));
+            int dx = ThreadLocalRandom.current().nextInt(-3, 4);
+            int dy = ThreadLocalRandom.current().nextInt(-1, 2);
+            int dz = ThreadLocalRandom.current().nextInt(-3, 4);
+            Block candidate = getRelativeIfInsideChunk(anchor, dx, dy, dz, minBlockX, maxBlockX, minBlockZ, maxBlockZ);
+            if (candidate == null || !converted.add(candidate.getBlockKey()) || !isReplaceableOreHost(candidate, oreType)) {
+                continue;
+            }
+            candidate.setType(oreType, false);
+            extra--;
+        }
+    }
+
+    private void multiplyExposed(
+        Block source,
+        Material oreType,
+        int extra,
+        int minBlockX,
+        int maxBlockX,
+        int minBlockZ,
+        int maxBlockZ
+    ) {
         Set<Long> converted = new HashSet<>();
         for (int distance = 1; distance <= 2 && extra > 0; distance++) {
             for (int dx = -distance; dx <= distance && extra > 0; dx++) {
@@ -415,13 +514,13 @@ public final class RestrictionListener implements Listener {
                         if (candidate == null) {
                             continue;
                         }
-                        if (!converted.add(candidate.getBlockKey()) || !isReplaceableDiamondHost(candidate, source.getType())) {
+                        if (!converted.add(candidate.getBlockKey()) || !isReplaceableOreHost(candidate, oreType)) {
                             continue;
                         }
                         if (!isExposedCandidate(candidate, minBlockX, maxBlockX, minBlockZ, maxBlockZ)) {
                             continue;
                         }
-                        candidate.setType(source.getType(), false);
+                        candidate.setType(oreType, false);
                         extra--;
                     }
                 }
@@ -429,14 +528,10 @@ public final class RestrictionListener implements Listener {
         }
     }
 
-    private boolean isDiamondOre(Material material) {
-        return material == Material.DIAMOND_ORE || material == Material.DEEPSLATE_DIAMOND_ORE;
-    }
-
-    private boolean isReplaceableDiamondHost(Block block, Material oreType) {
+    private boolean isReplaceableOreHost(Block block, Material oreType) {
         return switch (oreType) {
-            case DIAMOND_ORE -> block.getType() == Material.STONE || block.getType() == Material.TUFF;
-            case DEEPSLATE_DIAMOND_ORE -> block.getType() == Material.DEEPSLATE || block.getType() == Material.TUFF;
+            case DIAMOND_ORE, IRON_ORE, GOLD_ORE, COAL_ORE -> block.getType() == Material.STONE || block.getType() == Material.TUFF;
+            case DEEPSLATE_DIAMOND_ORE, DEEPSLATE_IRON_ORE, DEEPSLATE_GOLD_ORE, DEEPSLATE_COAL_ORE -> block.getType() == Material.DEEPSLATE || block.getType() == Material.TUFF;
             default -> false;
         };
     }
@@ -467,8 +562,15 @@ public final class RestrictionListener implements Listener {
         return block != null && (block.getType().isAir() || block.isLiquid());
     }
 
+    private boolean isRestrictedNetherite(ItemStack stack) {
+        return stack != null
+            && settings.worldRules().disableNetheriteProgression()
+            && NETHERITE_ITEMS.contains(stack.getType())
+            && !godItems.isAnyGodItem(stack);
+    }
+
     private boolean hasRestrictedEnchant(ItemStack stack) {
-        if (!settings.worldRules().disableRestrictedEnchants() || godItems.isAnyGodItem(stack)) {
+        if (stack == null || !settings.worldRules().disableRestrictedEnchants() || godItems.isAnyGodItem(stack) || perks.isPerkItem(stack)) {
             return false;
         }
         for (Map.Entry<Enchantment, Integer> entry : stack.getEnchantments().entrySet()) {
@@ -488,7 +590,7 @@ public final class RestrictionListener implements Listener {
     }
 
     private ItemStack sanitizeRestrictedEnchants(ItemStack stack) {
-        if (!settings.worldRules().disableRestrictedEnchants() || godItems.isAnyGodItem(stack)) {
+        if (stack == null || !settings.worldRules().disableRestrictedEnchants() || godItems.isAnyGodItem(stack) || perks.isPerkItem(stack)) {
             return stack;
         }
         ItemStack sanitized = stack;
@@ -584,6 +686,84 @@ public final class RestrictionListener implements Listener {
         if (changed) {
             villager.setRecipes(sanitizedRecipes);
         }
+    }
+
+    private ItemStack preparePrestigeGapple(CraftingInventory inventory) {
+        if (!isPrestigeGappleRecipe(inventory.getMatrix())) {
+            return null;
+        }
+        ItemStack result = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, craftingSettings.prestigeGodApple().resultAmount());
+        ItemMeta meta = result.getItemMeta();
+        meta.getPersistentDataContainer().set(prestigeGappleKey, PersistentDataType.BYTE, (byte) 1);
+        result.setItemMeta(meta);
+        return result;
+    }
+
+    private boolean isPrestigeGappleRecipe(ItemStack[] matrix) {
+        CraftingSettings.PrestigeGodApple recipe = craftingSettings.prestigeGodApple();
+        if (!recipe.enabled() || matrix.length < 9) {
+            return false;
+        }
+        for (int slot = 0; slot < 9; slot++) {
+            ItemStack item = matrix[slot];
+            if (slot == 4) {
+                if (item == null || item.getType() != recipe.centerItem() || item.getAmount() < 1) {
+                    return false;
+                }
+                continue;
+            }
+            if (item == null || item.getType() != recipe.surroundItem()) {
+                return false;
+            }
+            if (recipe.exactStacksRequired() && item.getAmount() != recipe.surroundStackSize()) {
+                return false;
+            }
+            if (!recipe.exactStacksRequired() && item.getAmount() < recipe.surroundStackSize()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void handlePrestigeGappleCraft(CraftItemEvent event) {
+        event.setCancelled(true);
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        if (event.isShiftClick() || event.getClick() == ClickType.DOUBLE_CLICK) {
+            return;
+        }
+        CraftingInventory inventory = event.getInventory();
+        if (!isPrestigeGappleRecipe(inventory.getMatrix())) {
+            return;
+        }
+        consumePrestigeGappleIngredients(inventory);
+        ItemStack result = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, craftingSettings.prestigeGodApple().resultAmount());
+        Map<Integer, ItemStack> leftovers = player.getInventory().addItem(result);
+        leftovers.values().forEach(leftover -> player.getWorld().dropItemNaturally(player.getLocation(), leftover));
+        player.updateInventory();
+    }
+
+    private void consumePrestigeGappleIngredients(CraftingInventory inventory) {
+        ItemStack[] matrix = inventory.getMatrix();
+        for (int slot = 0; slot < matrix.length; slot++) {
+            ItemStack item = matrix[slot];
+            if (item == null) {
+                continue;
+            }
+            if (slot == 4) {
+                item.setAmount(item.getAmount() - 1);
+            } else {
+                item.setAmount(item.getAmount() - craftingSettings.prestigeGodApple().surroundStackSize());
+            }
+            if (item.getAmount() <= 0) {
+                matrix[slot] = null;
+            } else {
+                matrix[slot] = item;
+            }
+        }
+        inventory.setMatrix(matrix);
+        inventory.setResult(null);
     }
 
     private int capLevel(Enchantment enchantment, int level) {

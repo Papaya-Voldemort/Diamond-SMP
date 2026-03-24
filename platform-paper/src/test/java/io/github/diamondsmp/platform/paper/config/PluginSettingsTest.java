@@ -30,4 +30,23 @@ class PluginSettingsTest {
         assertEquals("§b◆ §fDIAMOND SMP §8| §3THE DEEP END §b◆", settings.branding().motd().lineOne());
         assertEquals("§7Custom survival, event gear, and clean competitive progression", settings.branding().motd().lineTwo());
     }
+
+    @Test
+    void worldOreDefaultsFavorIronCoalAndToneDownDiamonds() {
+        PluginSettings settings = PluginSettings.load(new YamlConfiguration());
+
+        assertEquals(1.0D, settings.worldRules().diamondDropMultiplier());
+        assertTrue(settings.worldRules().diamondOre().veinSizeMultiplier() < settings.worldRules().ironOre().veinSizeMultiplier());
+        assertTrue(settings.worldRules().diamondOre().maxAddedBlocksPerVein() < settings.worldRules().coalOre().maxAddedBlocksPerVein());
+        assertEquals(1, settings.worldRules().diamondOre().exposedMaxAdditions());
+    }
+
+    @Test
+    void villagerEconomyDefaultsEnablePersistenceAndDiamondMasterTrades() {
+        PluginSettings settings = PluginSettings.load(new YamlConfiguration());
+
+        assertTrue(settings.villagers().persistManaged());
+        assertTrue(settings.villagers().dropEggOnKill());
+        assertEquals(0.20D, settings.villagers().masterDiamondTradeChance());
+    }
 }
