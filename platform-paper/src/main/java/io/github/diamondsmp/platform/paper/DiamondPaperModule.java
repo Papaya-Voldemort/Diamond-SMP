@@ -4,7 +4,12 @@ import io.github.diamondsmp.core.api.LifecyclePhase;
 import io.github.diamondsmp.core.api.PluginContext;
 import io.github.diamondsmp.platform.paper.advancement.MythicalAdvancementService;
 import io.github.diamondsmp.platform.paper.command.AdminCommands;
+import io.github.diamondsmp.platform.paper.command.BeaconCommands;
 import io.github.diamondsmp.platform.paper.command.PlayerCommands;
+import io.github.diamondsmp.platform.paper.beacon.GodBeaconCoreRegistry;
+import io.github.diamondsmp.platform.paper.beacon.GodBeaconCoreType;
+import io.github.diamondsmp.platform.paper.beacon.GodBeaconService;
+import io.github.diamondsmp.platform.paper.beacon.GodBeaconStore;
 import io.github.diamondsmp.platform.paper.config.CraftingSettings;
 import io.github.diamondsmp.platform.paper.config.MessageBundle;
 import io.github.diamondsmp.platform.paper.config.PluginSettings;
@@ -18,6 +23,7 @@ import io.github.diamondsmp.platform.paper.item.GodItemRegistry;
 import io.github.diamondsmp.platform.paper.listener.GameplayListener;
 import io.github.diamondsmp.platform.paper.listener.BrandingListener;
 import io.github.diamondsmp.platform.paper.listener.DragonEggListener;
+import io.github.diamondsmp.platform.paper.listener.GodBeaconListener;
 import io.github.diamondsmp.platform.paper.listener.GodMenuListener;
 import io.github.diamondsmp.platform.paper.listener.GuiAndVillagerListener;
 import io.github.diamondsmp.platform.paper.listener.PvpListener;
@@ -50,6 +56,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.recipe.CraftingBookCategory;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -99,6 +106,9 @@ public final class DiamondPaperModule {
         MythicalAdvancementService mythicalAdvancements = new MythicalAdvancementService(plugin, messages);
         RulesGui rulesGui = new RulesGui(rulesBook);
         GodMenuGui godMenuGui = new GodMenuGui();
+        GodBeaconCoreRegistry godBeaconCores = new GodBeaconCoreRegistry(plugin);
+        GodBeaconService godBeacons = new GodBeaconService(plugin, new GodBeaconStore(plugin), godBeaconCores);
+        godBeacons.start();
 
         context.lifecycle().mark(LifecyclePhase.REGISTER_LISTENERS);
         registerListeners(
@@ -108,6 +118,7 @@ public final class DiamondPaperModule {
             new GuiAndVillagerListener(rulesGui, villagerService, diamondMasterTrades, messages),
             new PvpListener(pvpGui, pvpService),
             new DragonEggListener(dragonEggService, messages),
+            new GodBeaconListener(plugin, godBeacons),
             new GodMenuListener(
                 plugin,
                 godMenuGui,
@@ -155,6 +166,7 @@ public final class DiamondPaperModule {
             settings.borderDefaults().warningDistance(),
             settings.borderDefaults().warningTime()
         );
+        BeaconCommands beaconCommands = new BeaconCommands(godBeacons);
         registerCommand("string", playerCommands, playerCommands);
         registerCommand("tpa", playerCommands, playerCommands);
         registerCommand("tpaccept", playerCommands, playerCommands);
@@ -174,8 +186,9 @@ public final class DiamondPaperModule {
         registerCommand("end", adminCommands, adminCommands);
         registerCommand("dragonegg", adminCommands, adminCommands);
         registerCommand("god", adminCommands, adminCommands);
+        registerCommand("beacon", beaconCommands, beaconCommands);
 
-        registerRecipes(craftingSettings);
+        registerRecipes(craftingSettings, godBeaconCores);
         configureBorders(settings);
         registerPlaceholderExpansion(eventManager);
     }
@@ -209,7 +222,7 @@ public final class DiamondPaperModule {
         return YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), fileName));
     }
 
-    private void registerRecipes(CraftingSettings craftingSettings) {
+    private void registerRecipes(CraftingSettings craftingSettings, GodBeaconCoreRegistry godBeaconCores) {
         if (craftingSettings.easyCobs()) {
             ShapelessRecipe cobwebRecipe = new ShapelessRecipe(new NamespacedKey(plugin, "easy_cobweb"), new ItemStack(Material.COBWEB, 5));
             for (int i = 0; i < 5; i++) {
@@ -225,6 +238,32 @@ public final class DiamondPaperModule {
             goldenAppleRecipe.setIngredient('A', Material.APPLE);
             Bukkit.addRecipe(goldenAppleRecipe);
         }
+
+        ShapedRecipe infusion = new ShapedRecipe(new NamespacedKey(plugin, "god_beacon_infusion_core"), godBeaconCores.createItem(GodBeaconCoreType.INFUSION));
+        infusion.shape("EDE", "DBD", "EDE");
+        infusion.setIngredient('E', Material.EMERALD_BLOCK);
+        infusion.setIngredient('D', Material.DIAMOND_BLOCK);
+        infusion.setIngredient('B', Material.BEACON);
+        Bukkit.addRecipe(infusion);
+
+        ShapedRecipe resonance = new ShapedRecipe(new NamespacedKey(plugin, "god_beacon_resonance_core"), godBeaconCores.createItem(GodBeaconCoreType.RESONANCE));
+        resonance.shape("DDD", "DCD", "DDD");
+        resonance.setIngredient('D', Material.DIAMOND_BLOCK);
+        resonance.setIngredient('C', new org.bukkit.inventory.RecipeChoice.ExactChoice(godBeaconCores.createItem(GodBeaconCoreType.INFUSION)));
+        Bukkit.addRecipe(resonance);
+
+        ShapedRecipe ascension = new ShapedRecipe(new NamespacedKey(plugin, "god_beacon_ascension_core"), godBeaconCores.createItem(GodBeaconCoreType.ASCENSION));
+        ascension.shape("NSN", "SCS", "NSN");
+        ascension.setIngredient('N', Material.DIAMOND_BLOCK);
+        ascension.setIngredient('S', Material.NETHER_STAR);
+        ascension.setIngredient('C', new org.bukkit.inventory.RecipeChoice.ExactChoice(godBeaconCores.createItem(GodBeaconCoreType.RESONANCE)));
+        Bukkit.addRecipe(ascension);
+
+        ShapedRecipe god = new ShapedRecipe(new NamespacedKey(plugin, "god_beacon_god_core"), godBeaconCores.createItem(GodBeaconCoreType.GOD));
+        god.shape("SSS", "SCS", "SSS");
+        god.setIngredient('S', Material.NETHER_STAR);
+        god.setIngredient('C', new org.bukkit.inventory.RecipeChoice.ExactChoice(godBeaconCores.createItem(GodBeaconCoreType.ASCENSION)));
+        Bukkit.addRecipe(god);
     }
 
     private void registerPlaceholderExpansion(ServerEventManager eventManager) {

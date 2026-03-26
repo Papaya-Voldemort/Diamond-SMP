@@ -170,3 +170,10 @@ pvp:
     list: "&6Your test players: &e{names}"
     cleared: "&aCleared &e{count}&a test player(s) from your party tools."
     live-match-blocked: "&cThat PvP mode cannot use your current test-player layout. Try 1v1 or 1v2 for solo admin testing."
+
+beacon:
+  not-found: "&cNo beacon found within 10 blocks."
+  infused: "&aBeacon infused. Power resonates through the structure."
+  resonant: "&aBeacon resonated. Its secondary current has awakened."
+  ascended: "&aBeacon ascended. Its presence lingers beyond its bounds."
+  god: "&6God Beacon awakened. This place is now a true stronghold."

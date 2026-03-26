@@ -84,6 +84,10 @@ commands:
   god:
     description: Owner control panel.
     usage: /god
+  beacon:
+    description: Inspect and manage God Beacons.
+    usage: /beacon [help|stats|setTier <tier>|giveCore <type>|debug]
+    permission: diamondsmp.command.beacon
 permissions:
   diamondsmp.command.string:
     default: true
@@ -103,6 +107,8 @@ permissions:
     default: true
   diamondsmp.command.pvp:
     default: true
+  diamondsmp.command.beacon:
+    default: true
   diamondsmp.admin.godvillager:
     default: op
   diamondsmp.admin.events:
@@ -118,4 +124,6 @@ permissions:
   diamondsmp.admin.dragonegg:
     default: op
   diamondsmp.admin.pvp-test:
+    default: op
+  diamondsmp.admin.beacon:
     default: op

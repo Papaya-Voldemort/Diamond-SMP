@@ -30,3 +30,13 @@ This makes progression social, competitive, and seasonal instead of purely grind
 - easy golden apples
 - easy cobweb crafting
 - kit-based PvP practice without risking SMP inventories
+
+## Base Prestige Path
+
+God Beacons add a second late-game sink that stays local to a player's base instead of replacing event gear.
+
+- upgrades are applied to placed beacon blocks only
+- every upgraded beacon tracks its own tier and selected effects
+- breaking an upgraded beacon preserves its tier in the dropped beacon item
+- higher tiers consume large diamond-block and nether-star payments during upgrade
+- all custom bonuses remain local to the beacon radius

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.7 - 2026-03-26
+
+- Added the full God Beacon progression system with persistent per-beacon tiers, portable beacon-state drops, and local-only upgraded aura behavior
+- Added crafted Core catalysts, upgrade-time diamond and nether-star payment checks, and nearby base-storage consumption for beacon upgrades
+- Added `/beacon` info, stats, debug, core-give, and tier-set commands plus new beacon docs and bundled messages
+- Added Tier 3 and Tier 4 passive systems including linger, regeneration throughput bonuses, hunger efficiency, durability efficiency, mining-speed bonus, visuals, sounds, and ore smelting aura
+- Added YAML-backed God Beacon persistence with restore-on-place handling and scheduled runtime tracking for active upgraded beacons
+
 ## 1.0.6 - 2026-03-24
 
 - Rebalanced new-chunk ore pressure so diamonds are toned down while iron, gold, and coal are boosted through configurable chunk rewrite settings

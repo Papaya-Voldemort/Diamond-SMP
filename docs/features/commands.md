@@ -120,3 +120,19 @@ Starts or stops the live event framework and selects the villager reward bucket.
 - `/end status`
 
 Controls End portal activation and active player access.
+
+### `/beacon`
+
+- `/beacon`
+- `/beacon help`
+- `/beacon stats`
+- `/beacon setTier <tier>`
+- `/beacon giveCore <type>`
+- `/beacon debug`
+
+Targets the beacon the player is looking at within 10 blocks, otherwise the nearest beacon within 10 blocks.
+
+- `/beacon` shows tier, active state, selected effects, radius, bonuses, and next upgrade cost.
+- `/beacon help` summarizes the tier path and upgrade cores.
+- `/beacon stats` shows exact multipliers, linger, and passive bonuses.
+- Admin subcommands allow direct tier mutation, core distribution, and runtime debug output.
